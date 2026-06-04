@@ -586,6 +586,10 @@
       margin-bottom: 8px;
     }
 
+    .input-line.wide-control {
+      grid-template-columns: minmax(52px, 0.62fr) minmax(128px, 1.38fr);
+    }
+
     .input-line label {
       color: var(--muted);
       font-size: 12px;
@@ -599,6 +603,12 @@
       border-radius: 7px;
       min-height: 32px;
       padding: 0 8px;
+    }
+
+    .input-line select {
+      width: 100%;
+      min-width: 0;
+      padding: 0 26px 0 8px;
     }
 
     .footer-note {
@@ -695,7 +705,7 @@
           <label for="protectCount">Juatalotli</label>
           <input id="protectCount" type="number" min="0" max="6" value="2">
         </div>
-        <div class="input-line">
+        <div class="input-line wide-control">
           <label for="valueGoal" data-i18n="label.goal">Goal</label>
           <select id="valueGoal" class="small-button">
             <option value="hybrid" data-i18n="goal.hybrid">Boss + Vault</option>
