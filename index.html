@@ -676,16 +676,6 @@
       </div>
 
       <div class="tool-section">
-        <h2 data-i18n="section.tier">Tier</h2>
-        <div class="segmented" id="tierButtons">
-          <button data-tier="1">I</button>
-          <button data-tier="2">II</button>
-          <button data-tier="3" class="active">III</button>
-          <button data-tier="4">IV</button>
-        </div>
-      </div>
-
-      <div class="tool-section">
         <h2 data-i18n="section.palette">Palette</h2>
         <div class="palette" id="palette"></div>
         <div class="assist-panel" id="placementAssist"></div>
@@ -788,7 +778,6 @@
       ja: {
         "app.title": "Temple Advisor",
         "app.mode": "0.5 Boss / Reward",
-        "section.tier": "Tier",
         "section.palette": "Palette",
         "section.marks": "Marks",
         "section.options": "Options",
@@ -880,7 +869,6 @@
       en: {
         "app.title": "Temple Advisor",
         "app.mode": "0.5 Boss / Reward",
-        "section.tier": "Tier",
         "section.palette": "Palette",
         "section.marks": "Marks",
         "section.options": "Options",
@@ -1020,7 +1008,6 @@
     const storageKey = "poe-temple-advisor:v1:local-state";
     const legacyLangKey = "templeAdvisorLang";
     let selectedRoom = "path";
-    let selectedTier = 3;
     let markMode = null;
     let board = makeEmptyBoard();
     let suggestions = new Map();
@@ -1164,8 +1151,8 @@
 
     function renderPalette() {
       paletteEl.innerHTML = roomTypes.map(([id]) => {
-        const label = id === "empty" ? roomTypeLabel(id) : roomDisplayName(id, selectedTier);
-        const title = id === "empty" ? label : roomTitle(id, selectedTier);
+        const label = id === "empty" ? roomTypeLabel(id) : roomTypeLabel(id);
+        const title = id === "empty" ? label : roomTitle(id, 1);
         return `
         <button class="palette-button ${selectedRoom === id ? "active" : ""}" data-room="${id}" title="${escapeHtml(title)}">
           ${icon(id)}
@@ -1215,11 +1202,7 @@
           button.addEventListener("click", () => paintCell(r, c));
           button.addEventListener("contextmenu", (event) => {
             event.preventDefault();
-            board[r][c] = { type: "empty", tier: 1, protect: false, upgrade: false };
-            suggestions.clear();
-            renderBoard();
-            exportBoard();
-            saveLocalState();
+            cycleCellTier(r, c);
           });
           boardEl.appendChild(button);
         }
@@ -1235,8 +1218,18 @@
       } else if (selectedRoom === "empty") {
         board[r][c] = { type: "empty", tier: 1, protect: false, upgrade: false };
       } else {
-        board[r][c] = { type: selectedRoom, tier: selectedTier, protect: false, upgrade: false };
+        board[r][c] = { type: selectedRoom, tier: 1, protect: false, upgrade: false };
       }
+      suggestions.clear();
+      renderBoard();
+      exportBoard();
+      saveLocalState();
+    }
+
+    function cycleCellTier(r, c) {
+      const cell = board[r][c];
+      if (cell.type === "empty") return;
+      cell.tier = cell.tier >= 4 ? 1 : cell.tier + 1;
       suggestions.clear();
       renderBoard();
       exportBoard();
@@ -1319,7 +1312,7 @@
         for (let c = 0; c < cols; c++) {
           const cell = board[r][c];
           if (!canPlaceCandidate(selectedRoom, cell, routeSet, r, c)) continue;
-          const scored = scorePlacement(selectedRoom, selectedTier, r, c, { arch, access, route, routeSet, pocketRank });
+          const scored = scorePlacement(selectedRoom, 1, r, c, { arch, access, route, routeSet, pocketRank });
           if (scored.score > -999) candidates.push(scored);
         }
       }
@@ -1428,7 +1421,7 @@
         placementAssistEl.innerHTML = `<strong>${escapeHtml(t("assist.empty.title"))}</strong>${escapeHtml(t("assist.empty.body"))}`;
         return;
       }
-      const room = roomTitle(selectedRoom, selectedTier);
+      const room = roomTitle(selectedRoom, 1);
       const top = [...hints.values()].sort((a, b) => a.rank - b.rank)[0];
       if (!top) {
         placementAssistEl.innerHTML = `<strong>${escapeHtml(t("assist.selected.title", { room }))}</strong>${escapeHtml(t("assist.noTargets.body"))}`;
@@ -1650,14 +1643,6 @@
       currentLang = currentLang === "ja" ? "en" : "ja";
       applyLanguage();
       saveLocalState();
-    });
-
-    document.getElementById("tierButtons").querySelectorAll("button").forEach(btn => {
-      btn.addEventListener("click", () => {
-        selectedTier = Number(btn.dataset.tier);
-        document.getElementById("tierButtons").querySelectorAll("button").forEach(b => b.classList.toggle("active", b === btn));
-        renderAll();
-      });
     });
 
     document.getElementById("protectMode").addEventListener("click", () => {
