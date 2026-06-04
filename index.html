@@ -338,6 +338,17 @@
       box-shadow: inset 0 0 0 2px rgba(226, 183, 97, 0.95);
     }
 
+    .cell.auto-tiered {
+      border-color: rgba(79, 179, 163, 0.62);
+      box-shadow: inset 0 0 0 1px rgba(79, 179, 163, 0.48);
+    }
+
+    .cell.auto-tiered.suggest-protect {
+      box-shadow:
+        inset 0 0 0 2px rgba(226, 183, 97, 0.95),
+        inset 0 0 0 4px rgba(79, 179, 163, 0.34);
+    }
+
     .cell.place-hint::after {
       content: "";
       position: absolute;
@@ -419,6 +430,12 @@
       text-align: center;
     }
 
+    .tier.auto {
+      background: rgba(79, 179, 163, 0.22);
+      border-color: rgba(79, 179, 163, 0.7);
+      color: #d9fff8;
+    }
+
     .mark {
       position: absolute;
       left: 4px;
@@ -468,6 +485,7 @@
     .legend-dot.place-best { color: #ffd666; }
     .legend-dot.place-good { color: var(--accent); }
     .legend-dot.place-ok { color: var(--blue); }
+    .legend-dot.auto-tier { color: var(--accent); }
     .legend-dot.keep { color: var(--green); }
     .legend-dot.warn { color: var(--danger); }
     .legend-dot.protect { color: var(--accent-2); }
@@ -745,6 +763,7 @@
           <span class="legend"><span class="legend-dot place-best"></span><span data-i18n="legend.best">Best</span></span>
           <span class="legend"><span class="legend-dot place-good"></span><span data-i18n="legend.good">Good</span></span>
           <span class="legend"><span class="legend-dot place-ok"></span><span data-i18n="legend.ok">Ok</span></span>
+          <span class="legend"><span class="legend-dot auto-tier"></span><span data-i18n="legend.autoTier">Auto Tier</span></span>
           <span class="legend"><span class="legend-dot keep"></span><span data-i18n="legend.keep">Keep</span></span>
           <span class="legend"><span class="legend-dot protect"></span><span data-i18n="legend.protect">Protect</span></span>
           <span class="legend"><span class="legend-dot warn"></span><span data-i18n="legend.conflict">Conflict</span></span>
@@ -810,9 +829,11 @@
         "legend.best": "最推奨",
         "legend.good": "良候補",
         "legend.ok": "候補",
+        "legend.autoTier": "隣接Tier",
         "legend.keep": "維持",
         "legend.protect": "保護",
         "legend.conflict": "競合",
+        "tier.auto": "隣接推定 T{tier}: {sources}",
         "advice.title": "ルート助言",
         "advice.subtitle": "現在のボードから",
         "json.title": "Board JSON",
@@ -852,6 +873,8 @@
         "advice.conflict.body": "{cells} は消えると痛いので、横ポケットに逃がすか、ここを幹線扱いで守る判断にします。",
         "advice.protect.title": "Juatalotli候補",
         "advice.protect.body": "{cells} を優先。幹線ジャンクションかT3価値部屋を守ります。",
+        "advice.autoTier.title": "隣接Tier上昇",
+        "advice.autoTier.body": "{cells} は隣接する部屋カードの影響でT2以上として表示しています。右クリック補正ではなく盤面由来の推定です。",
         "advice.reward.title": "アーキテクト報酬部屋",
         "advice.reward.body": "キシャラの宝物庫 / 畏敬の宝物庫 / 石板研究の宝物庫 / 古代の聖廟の宝物庫 が出たら、幹線横の外周寄りポケットに置くのが0.5向きです。",
         "advice.spine.title": "幹線を先に埋める",
@@ -901,9 +924,11 @@
         "legend.best": "Best",
         "legend.good": "Good",
         "legend.ok": "Ok",
+        "legend.autoTier": "Auto Tier",
         "legend.keep": "Keep",
         "legend.protect": "Protect",
         "legend.conflict": "Conflict",
+        "tier.auto": "Auto T{tier} from adjacent rooms: {sources}",
         "advice.title": "Route Advice",
         "advice.subtitle": "From current board",
         "json.title": "Board JSON",
@@ -943,6 +968,8 @@
         "advice.conflict.body": "{cells} would hurt to overwrite. Move it to a side pocket, or treat that cell as protected route.",
         "advice.protect.title": "Juatalotli candidates",
         "advice.protect.body": "Prioritize {cells}. Protect route junctions or T3 value rooms.",
+        "advice.autoTier.title": "Adjacent tier increase",
+        "advice.autoTier.body": "{cells} are displayed above T1 from adjacent room-card influence. This is board-derived, not a right-click override.",
         "advice.reward.title": "Architect reward rooms",
         "advice.reward.body": "If Kishara's Vault / Vault of Reverence / Tablet Research Vault / Ancient Reliquary Vault appears, place it in an outer side pocket next to the spine for 0.5.",
         "advice.spine.title": "Fill the spine first",
@@ -1034,6 +1061,7 @@
     const valueRooms = new Set(["currency", "lineage", "tablets", "unique", "treasure", "alchemy", "sacrifice", "thaum", "spymaster", "generator", "smithy", "corruption", "flesh", "garrison"]);
     const rewardRooms = new Set(["currency", "lineage", "tablets", "unique"]);
     const premiumRooms = new Set(["currency", "lineage", "tablets", "unique", "treasure", "alchemy", "sacrifice", "thaum"]);
+    const structuralRooms = new Set(["empty", "path", "architect", "access"]);
     const rows = 9;
     const cols = 9;
     const storageKey = "poe-temple-advisor:v1:local-state";
@@ -1129,10 +1157,8 @@
     function normalizeBoardState(candidate) {
       return candidate.map(row => row.map(cell => {
         const type = cell && roomMeta[cell.type] ? cell.type : "empty";
-        const tier = Math.max(1, Math.min(4, Number(cell?.tier) || 1));
         return {
           type,
-          tier,
           protect: Boolean(cell?.protect),
           upgrade: Boolean(cell?.upgrade)
         };
@@ -1157,7 +1183,7 @@
     function saveLocalState() {
       try {
         localStorage.setItem(storageKey, JSON.stringify({
-          version: 1,
+          version: 2,
           savedAt: new Date().toISOString(),
           language: currentLang,
           protectCount: Number(document.getElementById("protectCount").value || 0),
@@ -1169,7 +1195,7 @@
     }
 
     function makeEmptyBoard() {
-      return Array.from({ length: rows }, () => Array.from({ length: cols }, () => ({ type: "empty", tier: 1, protect: false, upgrade: false })));
+      return Array.from({ length: rows }, () => Array.from({ length: cols }, () => ({ type: "empty", protect: false, upgrade: false })));
     }
 
     function icon(type) {
@@ -1180,6 +1206,48 @@
     function key(r, c) { return `${r},${c}`; }
     function parseKey(k) { return k.split(",").map(Number); }
     function inBounds(r, c) { return r >= 0 && r < rows && c >= 0 && c < cols; }
+
+    function isTieredRoomType(type) {
+      return Boolean(roomNamesByTier.en[type]?.length > 1);
+    }
+
+    function adjacentCells(r, c) {
+      return [[0, -1], [0, 1], [-1, 0], [1, 0]]
+        .map(([dr, dc]) => [r + dr, c + dc])
+        .filter(([nr, nc]) => inBounds(nr, nc));
+    }
+
+    function computeTierMap() {
+      const out = new Map();
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cell = board[r][c];
+          if (!isTieredRoomType(cell.type)) continue;
+          const sources = adjacentCells(r, c).filter(([nr, nc]) => !structuralRooms.has(board[nr][nc].type));
+          out.set(key(r, c), {
+            tier: Math.min(4, 1 + sources.length),
+            sources
+          });
+        }
+      }
+      return out;
+    }
+
+    function effectiveTierAt(tierMap, r, c) {
+      return tierMap.get(key(r, c))?.tier || 1;
+    }
+
+    function tierSourceLabel([r, c]) {
+      return `${coord([r, c])} ${roomTypeLabel(board[r][c].type)}`;
+    }
+
+    function tierStatusText(tierInfo) {
+      if (!tierInfo?.sources?.length) return "";
+      return t("tier.auto", {
+        tier: tierInfo.tier,
+        sources: tierInfo.sources.map(tierSourceLabel).join(", ")
+      });
+    }
 
     function renderPalette() {
       paletteEl.innerHTML = roomTypes.map(([id]) => {
@@ -1204,19 +1272,24 @@
     function renderBoard() {
       boardEl.innerHTML = "";
       const placementHints = placementHintsForSelection();
+      const tierMap = computeTierMap();
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           const cell = board[r][c];
+          const tierInfo = tierMap.get(key(r, c));
+          const effectiveTier = tierInfo?.tier || 1;
           const sug = suggestions.get(key(r, c));
           const placement = placementHints.get(key(r, c));
           const classes = ["cell"];
           if (cell.type !== "empty") classes.push("has-room", `room-${cell.type}`);
+          if (tierInfo?.sources.length) classes.push("auto-tiered");
           if (sug?.kind) classes.push(`suggest-${sug.kind}`);
           if (sug?.protect) classes.push("suggest-protect");
           if (placement) classes.push("place-hint", `place-${placement.kind}`);
           const button = document.createElement("button");
           button.className = classes.join(" ");
-          const roomLabel = cell.type === "empty" ? "" : ` - ${roomTitle(cell.type, cell.tier)}`;
+          const tierLabel = tierStatusText(tierInfo);
+          const roomLabel = cell.type === "empty" ? "" : ` - ${roomTitle(cell.type, effectiveTier)}${tierLabel ? ` - ${tierLabel}` : ""}`;
           const placementLabel = placement
             ? ` - #${placement.rank} ${t(placement.kind === "best" ? "legend.best" : placement.kind === "good" ? "legend.good" : "legend.ok")}: ${t(placement.reasonKey)}`
             : "";
@@ -1225,17 +1298,13 @@
           button.dataset.c = c;
           button.innerHTML = `
             ${cell.type === "empty" ? "" : icon(cell.type)}
-            ${cell.type !== "empty" && cell.tier > 1 ? `<span class="tier">T${cell.tier}</span>` : ""}
+            ${cell.type !== "empty" && effectiveTier > 1 ? `<span class="tier auto">T${effectiveTier}</span>` : ""}
             ${placement ? `<span class="placement-rank">${placement.rank}</span>` : ""}
             ${cell.protect ? `<span class="mark"><svg class="tile-icon"><use href="#i-lock"></use></svg></span>` : ""}
             ${cell.upgrade ? `<span class="mark"><svg class="tile-icon"><use href="#i-arrow"></use></svg></span>` : ""}
             ${cell.type === "empty" ? `<span class="coord">${String.fromCharCode(65 + c)}${r + 1}</span>` : ""}
           `;
           button.addEventListener("click", () => paintCell(r, c));
-          button.addEventListener("contextmenu", (event) => {
-            event.preventDefault();
-            cycleCellTier(r, c);
-          });
           boardEl.appendChild(button);
         }
       }
@@ -1248,20 +1317,10 @@
       } else if (markMode === "upgrade") {
         if (board[r][c].type !== "empty") board[r][c].upgrade = !board[r][c].upgrade;
       } else if (selectedRoom === "empty") {
-        board[r][c] = { type: "empty", tier: 1, protect: false, upgrade: false };
+        board[r][c] = { type: "empty", protect: false, upgrade: false };
       } else {
-        board[r][c] = { type: selectedRoom, tier: 1, protect: false, upgrade: false };
+        board[r][c] = { type: selectedRoom, protect: false, upgrade: false };
       }
-      suggestions.clear();
-      renderBoard();
-      exportBoard();
-      saveLocalState();
-    }
-
-    function cycleCellTier(r, c) {
-      const cell = board[r][c];
-      if (cell.type === "empty") return;
-      cell.tier = cell.tier >= 4 ? 1 : cell.tier + 1;
       suggestions.clear();
       renderBoard();
       exportBoard();
@@ -1468,6 +1527,7 @@
     function evaluateBoard() {
       const { arch, access, route } = routeCells();
       const routeSet = new Set(route.map(([r, c]) => key(r, c)));
+      const tierMap = computeTierMap();
       const advice = [];
       suggestions = new Map();
       let score = 0;
@@ -1506,10 +1566,19 @@
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           const cell = board[r][c];
-          if (premiumRooms.has(cell.type)) placedPremium.push([r, c, cell]);
+          if (premiumRooms.has(cell.type)) placedPremium.push([r, c, cell, effectiveTierAt(tierMap, r, c)]);
         }
       }
       score += Math.min(18, placedPremium.length * 4);
+
+      const autoTiered = [...tierMap.entries()]
+        .map(([k, info]) => [k, info])
+        .filter(([, info]) => info.tier > 1)
+        .map(([k]) => coord(parseKey(k)));
+      if (autoTiered.length) {
+        advice.push(makeAdvice("advice.autoTier.title", "advice.autoTier.body", { cells: autoTiered.slice(0, 8).join(", ") }));
+        score += Math.min(10, autoTiered.length * 2);
+      }
 
       const availablePockets = pockets.filter(([r, c]) => {
         const cell = board[r][c];
@@ -1580,8 +1649,8 @@
       if (count <= 0) return [];
       const routeSet = new Set(route.map(([r, c]) => key(r, c)));
       const candidates = [];
-      for (const [r, c, cell] of premium) {
-        if (cell.tier >= 3) candidates.push([r, c, 100 + (rewardRooms.has(cell.type) ? 20 : 0)]);
+      for (const [r, c, cell, tier] of premium) {
+        if (tier >= 3) candidates.push([r, c, 100 + (rewardRooms.has(cell.type) ? 20 : 0)]);
       }
       const access = nearestTopAccess();
       const beforeAccess = route[Math.max(0, route.findIndex(([r, c]) => r === access[0] && c === access[1]) - 1)];
@@ -1629,17 +1698,17 @@
 
     function loadPreset() {
       board = makeEmptyBoard();
-      const set = (r, c, type, tier = 3, protect = false) => board[r][c] = { type, tier, protect, upgrade: false };
-      [[8,4], [7,4], [6,4], [5,4], [4,4], [3,4], [2,4], [1,4]].forEach(([r, c]) => set(r, c, "path", 1));
-      set(6, 4, "architect", 1);
-      set(0, 4, "access", 1);
-      set(2, 3, "currency", 3, true);
-      set(2, 5, "lineage", 3);
-      set(4, 3, "thaum", 3);
-      set(4, 5, "treasure", 3);
-      set(5, 3, "alchemy", 3);
-      set(5, 5, "sacrifice", 3);
-      set(3, 4, "path", 1, true);
+      const set = (r, c, type, protect = false) => board[r][c] = { type, protect, upgrade: false };
+      [[8,4], [7,4], [6,4], [5,4], [4,4], [3,4], [2,4], [1,4]].forEach(([r, c]) => set(r, c, "path"));
+      set(6, 4, "architect");
+      set(0, 4, "access");
+      set(2, 3, "currency", true);
+      set(2, 5, "lineage");
+      set(4, 3, "thaum");
+      set(4, 5, "treasure");
+      set(5, 3, "alchemy");
+      set(5, 5, "sacrifice");
+      set(3, 4, "path", true);
       evaluateBoard();
     }
 
@@ -1653,7 +1722,7 @@
     }
 
     function exportBoard() {
-      document.getElementById("boardJson").value = JSON.stringify({ version: 1, board }, null, 2);
+      document.getElementById("boardJson").value = JSON.stringify({ version: 2, board }, null, 2);
     }
 
     function importBoard() {

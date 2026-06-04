@@ -11,8 +11,9 @@ runs entirely as static HTML/CSS/JavaScript.
 
 Select a room card in the palette to highlight recommended placement cells.
 The strongest candidate is shown in gold, followed by good and okay options.
-Cards are placed as Tier 1 rooms. Right-click an existing room to cycle its
-Tier when correcting the current board state.
+Cards place only the room type. Room Tier is inferred from adjacent room-card
+influence and highlighted on the board, so higher-Tier displays are
+board-derived instead of manual right-click overrides.
 
 ## Privacy model
 
