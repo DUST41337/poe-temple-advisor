@@ -2,9 +2,11 @@
 
 A static browser tool for planning Path of Exile 2 Temple of Atziri boards.
 
+Open the app: https://dust41337.github.io/poe-temple-advisor/
+
 ## Use
 
-Open the published GitHub Pages URL and edit the board in your browser. The app
+Open the GitHub Pages URL above and edit the board in your browser. The app
 runs entirely as static HTML/CSS/JavaScript.
 
 ## Privacy model
