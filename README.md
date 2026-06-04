@@ -15,7 +15,7 @@ Cards place only the room type. Room Tier is inferred from PoE2DB upgrade
 sources and highlighted on the board, so higher-Tier displays are board-derived
 instead of manual right-click overrides.
 
-Use the Offered Cards slots for the three cards currently shown in-game. Click
+Use the Offered Cards slots for the six cards currently shown in-game. Click
 one of those cards to focus the placement assist on that card. The palette is
 grouped into core, reward, value, and support rooms; support rooms include
 PoE2DB upgrade sources such as Commander, Armoury, Golem Works, and Synthflesh
