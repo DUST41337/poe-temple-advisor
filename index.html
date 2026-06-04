@@ -180,6 +180,25 @@
       overflow-wrap: anywhere;
     }
 
+    .assist-panel {
+      margin-top: 10px;
+      padding: 9px;
+      min-height: 66px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 7px;
+      background: rgba(0,0,0,0.15);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .assist-panel strong {
+      display: block;
+      color: var(--text);
+      font-size: 12px;
+      margin-bottom: 3px;
+    }
+
     .tile-icon {
       width: 24px;
       height: 24px;
@@ -319,6 +338,66 @@
       box-shadow: inset 0 0 0 2px rgba(226, 183, 97, 0.95);
     }
 
+    .cell.place-hint::after {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      border-radius: 5px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .cell > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .cell.place-best {
+      border-color: rgba(255, 214, 102, 0.95);
+      box-shadow:
+        0 0 0 2px rgba(255, 214, 102, 0.75),
+        0 0 18px rgba(255, 214, 102, 0.34);
+    }
+
+    .cell.place-best::after {
+      background: rgba(255, 214, 102, 0.16);
+    }
+
+    .cell.place-good {
+      border-color: rgba(79, 179, 163, 0.82);
+      box-shadow: 0 0 0 2px rgba(79, 179, 163, 0.42);
+    }
+
+    .cell.place-good::after {
+      background: rgba(79, 179, 163, 0.12);
+    }
+
+    .cell.place-ok {
+      border-color: rgba(101, 167, 223, 0.62);
+      box-shadow: 0 0 0 1px rgba(101, 167, 223, 0.42);
+    }
+
+    .cell.place-ok::after {
+      background: rgba(101, 167, 223, 0.09);
+    }
+
+    .placement-rank {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: rgba(0, 0, 0, 0.68);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff3bd;
+      font-size: 10px;
+      font-weight: 750;
+      z-index: 2;
+    }
+
     .cell .tile-icon {
       width: clamp(21px, 5vw, 34px);
       height: clamp(21px, 5vw, 34px);
@@ -386,6 +465,9 @@
     }
 
     .legend-dot.add { color: var(--blue); }
+    .legend-dot.place-best { color: #ffd666; }
+    .legend-dot.place-good { color: var(--accent); }
+    .legend-dot.place-ok { color: var(--blue); }
     .legend-dot.keep { color: var(--green); }
     .legend-dot.warn { color: var(--danger); }
     .legend-dot.protect { color: var(--accent-2); }
@@ -606,6 +688,7 @@
       <div class="tool-section">
         <h2 data-i18n="section.palette">Palette</h2>
         <div class="palette" id="palette"></div>
+        <div class="assist-panel" id="placementAssist"></div>
       </div>
 
       <div class="tool-section">
@@ -659,6 +742,9 @@
         <div class="external-room room-path"><span class="tile-icon"><svg><use href="#i-path"></use></svg></span><span data-i18n="external.entrance">Entrance</span></div>
         <div class="hintbar">
           <span class="legend"><span class="legend-dot add"></span><span data-i18n="legend.add">Add</span></span>
+          <span class="legend"><span class="legend-dot place-best"></span><span data-i18n="legend.best">Best</span></span>
+          <span class="legend"><span class="legend-dot place-good"></span><span data-i18n="legend.good">Good</span></span>
+          <span class="legend"><span class="legend-dot place-ok"></span><span data-i18n="legend.ok">Ok</span></span>
           <span class="legend"><span class="legend-dot keep"></span><span data-i18n="legend.keep">Keep</span></span>
           <span class="legend"><span class="legend-dot protect"></span><span data-i18n="legend.protect">Protect</span></span>
           <span class="legend"><span class="legend-dot warn"></span><span data-i18n="legend.conflict">Conflict</span></span>
@@ -722,6 +808,9 @@
         "external.atziri": "Atziriの間",
         "external.entrance": "Foyer",
         "legend.add": "追加",
+        "legend.best": "最推奨",
+        "legend.good": "良候補",
+        "legend.ok": "候補",
         "legend.keep": "維持",
         "legend.protect": "保護",
         "legend.conflict": "競合",
@@ -775,7 +864,18 @@
         "advice.goal.hybrid.title": "Hybrid運用",
         "advice.goal.hybrid.body": "Architect報酬部屋を取り、Royal Accessが自然に置ける時だけAtziriへ。Expeditionの合間に回すサブ寺院向きです。",
         "advice.importFailed.title": "Import失敗",
-        "advice.importFailed.body": "{message}"
+        "advice.importFailed.body": "{message}",
+        "assist.empty.title": "カード配置アシスト",
+        "assist.empty.body": "左のカードを選ぶと、現在の盤面で置きたい場所が光ります。",
+        "assist.selected.title": "{room} を配置",
+        "assist.selected.body": "最推奨: {best}。{reason}",
+        "assist.noTargets.body": "このカードの明確な候補がありません。幹線を先に作るか、空きマスを増やしてください。",
+        "reason.path": "Entrance -> Architect -> Royal Access の未接続マスを優先します。",
+        "reason.royal": "Atziri側の外周寄りで、Architectからつなぎやすいマスを優先します。",
+        "reason.reward": "幹線横の外周寄りポケットを優先します。Atziri後に消したくないVault枠です。",
+        "reason.value": "幹線を塞がず、後で保護しやすい横ポケットを優先します。",
+        "reason.generator": "価値部屋やSmithy/Flesh Surgeonの近くで、周辺に空きがあるマスを優先します。",
+        "reason.default": "空きマスで、幹線から近すぎず遠すぎない場所を優先します。"
       },
       en: {
         "app.title": "Temple Advisor",
@@ -800,6 +900,9 @@
         "external.atziri": "Atziri's Chamber",
         "external.entrance": "Foyer",
         "legend.add": "Add",
+        "legend.best": "Best",
+        "legend.good": "Good",
+        "legend.ok": "Ok",
         "legend.keep": "Keep",
         "legend.protect": "Protect",
         "legend.conflict": "Conflict",
@@ -853,7 +956,18 @@
         "advice.goal.hybrid.title": "Hybrid plan",
         "advice.goal.hybrid.body": "Take Architect reward rooms and go Atziri only when Royal Access lands naturally. This fits side Temple runs between Expedition maps.",
         "advice.importFailed.title": "Import failed",
-        "advice.importFailed.body": "{message}"
+        "advice.importFailed.body": "{message}",
+        "assist.empty.title": "Card Placement Assist",
+        "assist.empty.body": "Select a card on the left to highlight placement candidates on the board.",
+        "assist.selected.title": "Place {room}",
+        "assist.selected.body": "Best: {best}. {reason}",
+        "assist.noTargets.body": "No clear candidate for this card. Build the spine first or free up more cells.",
+        "reason.path": "Prioritizes missing cells on the Entrance -> Architect -> Royal Access route.",
+        "reason.royal": "Prioritizes outer cells near Atziri that are easy to connect from the Architect.",
+        "reason.reward": "Prioritizes outer side pockets next to the spine for Vault rewards you want to preserve.",
+        "reason.value": "Prioritizes side pockets that do not block the spine and can be protected later.",
+        "reason.generator": "Prioritizes cells near value rooms or Smithy/Flesh Surgeon with useful nearby space.",
+        "reason.default": "Prioritizes empty cells that are neither too close to nor too far from the spine."
       }
     };
 
@@ -916,6 +1030,7 @@
 
     const boardEl = document.getElementById("board");
     const paletteEl = document.getElementById("palette");
+    const placementAssistEl = document.getElementById("placementAssist");
     const adviceList = document.getElementById("adviceList");
 
     function t(key, vars = {}) {
@@ -1069,23 +1184,30 @@
 
     function renderBoard() {
       boardEl.innerHTML = "";
+      const placementHints = placementHintsForSelection();
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           const cell = board[r][c];
           const sug = suggestions.get(key(r, c));
+          const placement = placementHints.get(key(r, c));
           const classes = ["cell"];
           if (cell.type !== "empty") classes.push("has-room", `room-${cell.type}`);
           if (sug?.kind) classes.push(`suggest-${sug.kind}`);
           if (sug?.protect) classes.push("suggest-protect");
+          if (placement) classes.push("place-hint", `place-${placement.kind}`);
           const button = document.createElement("button");
           button.className = classes.join(" ");
           const roomLabel = cell.type === "empty" ? "" : ` - ${roomTitle(cell.type, cell.tier)}`;
-          button.title = `${String.fromCharCode(65 + c)}${r + 1}${roomLabel}`;
+          const placementLabel = placement
+            ? ` - #${placement.rank} ${t(placement.kind === "best" ? "legend.best" : placement.kind === "good" ? "legend.good" : "legend.ok")}: ${t(placement.reasonKey)}`
+            : "";
+          button.title = `${String.fromCharCode(65 + c)}${r + 1}${roomLabel}${placementLabel}`;
           button.dataset.r = r;
           button.dataset.c = c;
           button.innerHTML = `
             ${cell.type === "empty" ? "" : icon(cell.type)}
             ${cell.type !== "empty" && cell.tier > 1 ? `<span class="tier">T${cell.tier}</span>` : ""}
+            ${placement ? `<span class="placement-rank">${placement.rank}</span>` : ""}
             ${cell.protect ? `<span class="mark"><svg class="tile-icon"><use href="#i-lock"></use></svg></span>` : ""}
             ${cell.upgrade ? `<span class="mark"><svg class="tile-icon"><use href="#i-arrow"></use></svg></span>` : ""}
             ${cell.type === "empty" ? `<span class="coord">${String.fromCharCode(65 + c)}${r + 1}</span>` : ""}
@@ -1102,6 +1224,7 @@
           boardEl.appendChild(button);
         }
       }
+      renderPlacementAssist(placementHints);
     }
 
     function paintCell(r, c) {
@@ -1183,6 +1306,138 @@
       }
       pockets.sort((a, b) => a[2] - b[2]);
       return pockets.map(([r, c]) => [r, c]);
+    }
+
+    function placementHintsForSelection() {
+      if (markMode || selectedRoom === "empty") return new Map();
+      const { arch, access, route } = routeCells();
+      const routeSet = new Set(route.map(([r, c]) => key(r, c)));
+      const pocketRank = new Map(sidePockets(route).map(([r, c], index) => [key(r, c), index]));
+      const candidates = [];
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cell = board[r][c];
+          if (!canPlaceCandidate(selectedRoom, cell, routeSet, r, c)) continue;
+          const scored = scorePlacement(selectedRoom, selectedTier, r, c, { arch, access, route, routeSet, pocketRank });
+          if (scored.score > -999) candidates.push(scored);
+        }
+      }
+
+      candidates.sort((a, b) => b.score - a.score);
+      const unique = candidates.slice(0, 9);
+      const out = new Map();
+      unique.forEach((candidate, index) => {
+        out.set(key(candidate.r, candidate.c), {
+          ...candidate,
+          rank: index + 1,
+          kind: index === 0 ? "best" : index < 4 ? "good" : "ok"
+        });
+      });
+      return out;
+    }
+
+    function canPlaceCandidate(type, cell, routeSet, r, c) {
+      if (cell.protect) return false;
+      if (cell.type === "empty") return true;
+      if (type === "path") return false;
+      if (cell.type === type) return false;
+      if (routeSet.has(key(r, c)) && valueRooms.has(cell.type)) return false;
+      return cell.type === "path" && !routeSet.has(key(r, c));
+    }
+
+    function scorePlacement(type, tier, r, c, context) {
+      const { arch, access, route, routeSet, pocketRank } = context;
+      const k = key(r, c);
+      const cell = board[r][c];
+      const routeDistance = minDistanceToCells([r, c], route);
+      const outerBonus = isOuterCell(r, c) ? 13 : 0;
+      const topBonus = Math.max(0, 8 - r);
+      const emptyBonus = cell.type === "empty" ? 14 : -12;
+      let score = 0;
+      let reasonKey = "reason.default";
+
+      if (type === "path") {
+        const routeIndex = route.findIndex(([rr, cc]) => rr === r && cc === c);
+        score = routeIndex >= 0 ? 150 - routeIndex : -999;
+        reasonKey = "reason.path";
+      } else if (type === "architect") {
+        score = 120 - manhattan([r, c], arch) * 18 + emptyBonus;
+        reasonKey = "reason.path";
+      } else if (type === "access") {
+        score = 125 - manhattan([r, c], access) * 18 + outerBonus + topBonus + emptyBonus;
+        if (routeDistance === 1) score += 18;
+        reasonKey = "reason.royal";
+      } else if (rewardRooms.has(type)) {
+        score = scoreSidePocket(r, c, routeDistance, pocketRank, routeSet) + outerBonus + topBonus + emptyBonus + 20;
+        reasonKey = "reason.reward";
+      } else if (premiumRooms.has(type) || type === "treasure") {
+        score = scoreSidePocket(r, c, routeDistance, pocketRank, routeSet) + emptyBonus + 14;
+        if (tier >= 3) score += 8;
+        reasonKey = "reason.value";
+      } else if (type === "generator") {
+        score = scoreSidePocket(r, c, routeDistance, pocketRank, routeSet) + emptyBonus + generatorSupportScore(r, c);
+        reasonKey = "reason.generator";
+      } else {
+        score = scoreSidePocket(r, c, routeDistance, pocketRank, routeSet) + emptyBonus;
+      }
+
+      if (routeSet.has(k) && type !== "path" && type !== "architect" && type !== "access") score -= 80;
+      if (cell.type !== "empty") score -= 18;
+      return { r, c, score, reasonKey };
+    }
+
+    function scoreSidePocket(r, c, routeDistance, pocketRank, routeSet) {
+      let score = 60;
+      const rank = pocketRank.get(key(r, c));
+      if (rank !== undefined) score += Math.max(0, 42 - rank * 5);
+      if (routeDistance === 1) score += 22;
+      if (routeDistance === 2) score += 8;
+      if (routeSet.has(key(r, c))) score -= 40;
+      score += Math.max(0, 5 - Math.abs(r - 4));
+      return score;
+    }
+
+    function generatorSupportScore(r, c) {
+      let score = 0;
+      const supportTypes = new Set(["smithy", "flesh", "alchemy", "thaum", "sacrifice", "corruption"]);
+      for (const [dr, dc] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
+        const nr = r + dr, nc = c + dc;
+        if (!inBounds(nr, nc)) continue;
+        if (supportTypes.has(board[nr][nc].type)) score += 18;
+        if (board[nr][nc].type === "empty") score += 3;
+      }
+      return score;
+    }
+
+    function minDistanceToCells(point, cells) {
+      return Math.min(...cells.map(cell => manhattan(point, cell)));
+    }
+
+    function manhattan(a, b) {
+      return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
+    }
+
+    function isOuterCell(r, c) {
+      return r === 0 || c === 0 || r === rows - 1 || c === cols - 1;
+    }
+
+    function renderPlacementAssist(hints) {
+      if (!placementAssistEl) return;
+      if (markMode || selectedRoom === "empty") {
+        placementAssistEl.innerHTML = `<strong>${escapeHtml(t("assist.empty.title"))}</strong>${escapeHtml(t("assist.empty.body"))}`;
+        return;
+      }
+      const room = roomTitle(selectedRoom, selectedTier);
+      const top = [...hints.values()].sort((a, b) => a.rank - b.rank)[0];
+      if (!top) {
+        placementAssistEl.innerHTML = `<strong>${escapeHtml(t("assist.selected.title", { room }))}</strong>${escapeHtml(t("assist.noTargets.body"))}`;
+        return;
+      }
+      placementAssistEl.innerHTML = `<strong>${escapeHtml(t("assist.selected.title", { room }))}</strong>${escapeHtml(t("assist.selected.body", {
+        best: coord([top.r, top.c]),
+        reason: t(top.reasonKey)
+      }))}`;
     }
 
     function evaluateBoard() {
@@ -1401,7 +1656,7 @@
       btn.addEventListener("click", () => {
         selectedTier = Number(btn.dataset.tier);
         document.getElementById("tierButtons").querySelectorAll("button").forEach(b => b.classList.toggle("active", b === btn));
-        renderPalette();
+        renderAll();
       });
     });
 

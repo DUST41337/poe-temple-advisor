@@ -9,6 +9,9 @@ Open the app: https://dust41337.github.io/poe-temple-advisor/
 Open the GitHub Pages URL above and edit the board in your browser. The app
 runs entirely as static HTML/CSS/JavaScript.
 
+Select a room card in the palette to highlight recommended placement cells.
+The strongest candidate is shown in gold, followed by good and okay options.
+
 ## Privacy model
 
 Board edits are saved only in the current browser with `localStorage`.
