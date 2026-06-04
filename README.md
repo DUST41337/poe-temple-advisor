@@ -23,3 +23,5 @@ Use Board JSON export/import when you want a manual backup or to share a board.
 ## Notes
 
 Icons are local schematic symbols for planning and are not copied game assets.
+Room names are aligned with PoE2DB's Atziri's Temple room list:
+https://poe2db.tw/us/Atziris_Temple#Rooms
