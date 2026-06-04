@@ -146,6 +146,31 @@
       color: #d9fff8;
     }
 
+    .palette-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+      margin-bottom: 9px;
+    }
+
+    .palette-tabs button {
+      min-height: 28px;
+      padding: 0 4px;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 11px;
+      overflow-wrap: anywhere;
+    }
+
+    .palette-tabs button.active {
+      color: #d9fff8;
+      border-color: var(--accent);
+      background: rgba(79, 179, 163, 0.16);
+    }
+
     .palette {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -178,6 +203,53 @@
       line-height: 1.08;
       text-align: center;
       overflow-wrap: anywhere;
+    }
+
+    .offered-cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 7px;
+      margin-bottom: 8px;
+    }
+
+    .offered-card {
+      min-height: 58px;
+      padding: 5px 4px;
+      display: grid;
+      place-items: center;
+      gap: 2px;
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--panel-2);
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .offered-card.empty {
+      color: var(--muted);
+      border-style: dashed;
+      cursor: default;
+    }
+
+    .offered-card.active {
+      border-color: var(--accent-2);
+      outline: 2px solid rgba(226, 183, 97, 0.2);
+      background: rgba(226, 183, 97, 0.08);
+    }
+
+    .offered-card .mini-label {
+      font-size: 9.5px;
+      line-height: 1.1;
+      color: var(--muted);
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+
+    .compact-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
     }
 
     .assist-panel {
@@ -233,6 +305,12 @@
     .room-smithy { color: #b0bac8; }
     .room-corruption { color: #ff7b9c; }
     .room-flesh { color: #f28f73; }
+    .room-commander { color: #d7b56d; }
+    .room-armoury { color: #9fb0c8; }
+    .room-golem { color: #8fc7c7; }
+    .room-synthflesh { color: #e69bbb; }
+    .room-legion { color: #c5a36a; }
+    .room-transcendent { color: #a6d9ff; }
 
     .board-wrap {
       padding: 14px;
@@ -347,6 +425,11 @@
       box-shadow:
         inset 0 0 0 2px rgba(226, 183, 97, 0.95),
         inset 0 0 0 4px rgba(79, 179, 163, 0.34);
+    }
+
+    .cell.tier-source {
+      outline: 1px solid rgba(226, 183, 97, 0.55);
+      outline-offset: -4px;
     }
 
     .cell.place-hint::after {
@@ -539,6 +622,53 @@
       gap: 9px;
     }
 
+    .tier-detail {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(0,0,0,0.12);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .tier-detail h2 {
+      margin-bottom: 0;
+    }
+
+    .tier-row {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 8px;
+      align-items: start;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .tier-row strong {
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    .tier-row .badge {
+      min-height: 24px;
+      border-radius: 7px;
+      display: grid;
+      place-items: center;
+      background: rgba(79, 179, 163, 0.16);
+      color: #d9fff8;
+      border: 1px solid rgba(79, 179, 163, 0.35);
+      font-weight: 760;
+    }
+
+    .tier-empty {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
     .advice {
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -686,6 +816,12 @@
     <symbol id="i-smithy" viewBox="0 0 24 24"><path d="M4 17h12c2 0 4-2 4-4h-6V8H8v5H4z"/><path d="M8 17v3h8v-3"/><path d="M9 5h6"/></symbol>
     <symbol id="i-corruption" viewBox="0 0 24 24"><path d="M12 3c4 2 6 5 6 9a6 6 0 0 1-12 0c0-4 2-7 6-9z"/><path d="M8 12c3 1 5 1 8 0"/><path d="M10 16c1.5-.8 2.5-.8 4 0"/></symbol>
     <symbol id="i-flesh" viewBox="0 0 24 24"><path d="M8 12V6a2 2 0 1 1 4 0v5"/><path d="M12 11V5a2 2 0 1 1 4 0v8"/><path d="M16 13l2-3a2 2 0 1 1 3 2l-4 7H9l-4-5a2 2 0 0 1 3-3l2 2"/></symbol>
+    <symbol id="i-commander" viewBox="0 0 24 24"><path d="M5 20V5"/><path d="M5 5h12l-2 4 2 4H5"/><path d="M8 17h10"/></symbol>
+    <symbol id="i-armoury" viewBox="0 0 24 24"><path d="M12 3l7 4v5c0 4.4-2.9 7.4-7 8-4.1-.6-7-3.6-7-8V7z"/><path d="M9 9h6M8 13h8"/></symbol>
+    <symbol id="i-golem" viewBox="0 0 24 24"><rect x="6" y="7" width="12" height="12" rx="2"/><path d="M9 7V4h6v3M9 11h.1M15 11h.1M9 16h6"/><path d="M4 12H2M22 12h-2"/></symbol>
+    <symbol id="i-synthflesh" viewBox="0 0 24 24"><path d="M8 4c6 2 2 6 8 8-6 2-2 6-8 8"/><path d="M16 4c-6 2-2 6-8 8 6 2 2 6 8 8"/><path d="M9 7h6M9 17h6"/></symbol>
+    <symbol id="i-legion" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 20V6l4-3 4 3v14"/><path d="M17 20V9l3 2v9"/><path d="M9 10h4M9 14h4"/></symbol>
+    <symbol id="i-transcendent" viewBox="0 0 24 24"><path d="M12 3l8 7-8 11-8-11z"/><path d="M4 10h16M8 10l4 11 4-11"/><path d="M9 6h6"/></symbol>
     <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
     <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
     <symbol id="i-evaluate" viewBox="0 0 24 24"><path d="M4 13l4 4L20 5"/><path d="M4 5h9"/></symbol>
@@ -704,7 +840,17 @@
       </div>
 
       <div class="tool-section">
+        <h2 data-i18n="section.offered">Offered Cards</h2>
+        <div class="offered-cards" id="offeredCards"></div>
+        <div class="compact-actions">
+          <button class="small-button" id="addOfferedCard" data-i18n="action.addCard">Add Selected</button>
+          <button class="small-button" id="clearOfferedCards" data-i18n="action.clearCards">Clear Cards</button>
+        </div>
+      </div>
+
+      <div class="tool-section">
         <h2 data-i18n="section.palette">Palette</h2>
+        <div class="palette-tabs" id="paletteTabs"></div>
         <div class="palette" id="palette"></div>
         <div class="assist-panel" id="placementAssist"></div>
       </div>
@@ -787,6 +933,10 @@
           </div>
         </div>
         <div class="advice-list" id="adviceList"></div>
+        <div class="tier-detail">
+          <h2 data-i18n="tier.panel.title">Tier Sources</h2>
+          <div id="tierDetail"></div>
+        </div>
         <div>
           <h2 data-i18n="json.title">Board JSON</h2>
           <textarea id="boardJson" spellcheck="false"></textarea>
@@ -807,6 +957,7 @@
       ja: {
         "app.title": "Temple Advisor",
         "app.mode": "0.5 ボス / 報酬",
+        "section.offered": "提示カード",
         "section.palette": "Palette",
         "section.marks": "Marks",
         "section.options": "Options",
@@ -823,17 +974,26 @@
         "action.clear": "クリア",
         "action.export": "Export",
         "action.import": "Import",
+        "action.addCard": "選択を追加",
+        "action.clearCards": "カード消去",
         "external.atziri": "アッツィリの私室",
         "external.entrance": "前室",
+        "cards.empty": "未登録",
+        "palette.core": "基本",
+        "palette.rewards": "報酬",
+        "palette.value": "価値",
+        "palette.support": "育成",
         "legend.add": "追加",
         "legend.best": "最推奨",
         "legend.good": "良候補",
         "legend.ok": "候補",
-        "legend.autoTier": "隣接Tier",
+        "legend.autoTier": "自動Tier",
         "legend.keep": "維持",
         "legend.protect": "保護",
         "legend.conflict": "競合",
-        "tier.auto": "隣接推定 T{tier}: {sources}",
+        "tier.auto": "推定 T{tier}: {sources}",
+        "tier.panel.title": "Tier根拠",
+        "tier.panel.empty": "Tier上昇している部屋はまだありません。",
         "advice.title": "ルート助言",
         "advice.subtitle": "現在のボードから",
         "json.title": "Board JSON",
@@ -856,6 +1016,12 @@
         "room.smithy": "鍛冶場",
         "room.corruption": "穢れの間",
         "room.flesh": "肉の外科手術室",
+        "room.commander": "司令官",
+        "room.armoury": "装備庫",
+        "room.golem": "ゴーレム作業所",
+        "room.synthflesh": "合成肉の研究所",
+        "room.legion": "軍団の兵舎",
+        "room.transcendent": "超越の兵舎",
         "score.empty": "未評価",
         "score.emptyText": "アーキテクトの間を置いて評価すると、幹線・保護・価値部屋の差分を出します。",
         "score.ready": "走れる形",
@@ -873,8 +1039,8 @@
         "advice.conflict.body": "{cells} は消えると痛いので、横ポケットに逃がすか、ここを幹線扱いで守る判断にします。",
         "advice.protect.title": "Juatalotli候補",
         "advice.protect.body": "{cells} を優先。幹線ジャンクションかT3価値部屋を守ります。",
-        "advice.autoTier.title": "隣接Tier上昇",
-        "advice.autoTier.body": "{cells} は隣接する部屋カードの影響でT2以上として表示しています。右クリック補正ではなく盤面由来の推定です。",
+        "advice.autoTier.title": "自動Tier上昇",
+        "advice.autoTier.body": "{cells} はPoE2DBのアップグレード元に合うカードの影響でT2以上として表示しています。右クリック補正ではなく盤面由来の推定です。",
         "advice.reward.title": "アーキテクト報酬部屋",
         "advice.reward.body": "キシャラの宝物庫 / 畏敬の宝物庫 / 石板研究の宝物庫 / 古代の聖廟の宝物庫 が出たら、幹線横の外周寄りポケットに置くのが0.5向きです。",
         "advice.spine.title": "幹線を先に埋める",
@@ -897,11 +1063,13 @@
         "reason.reward": "幹線横の外周寄りポケットを優先します。アッツィリ後に消したくない宝物庫枠です。",
         "reason.value": "幹線を塞がず、後で保護しやすい横ポケットを優先します。",
         "reason.generator": "価値部屋やSmithy/Flesh Surgeonの近くで、周辺に空きがあるマスを優先します。",
+        "reason.upgrade": "既存部屋のTier根拠になる隣接位置を優先します。",
         "reason.default": "空きマスで、幹線から近すぎず遠すぎない場所を優先します。"
       },
       en: {
         "app.title": "Temple Advisor",
         "app.mode": "0.5 Boss / Reward",
+        "section.offered": "Offered Cards",
         "section.palette": "Palette",
         "section.marks": "Marks",
         "section.options": "Options",
@@ -918,8 +1086,15 @@
         "action.clear": "Clear",
         "action.export": "Export",
         "action.import": "Import",
+        "action.addCard": "Add Selected",
+        "action.clearCards": "Clear Cards",
         "external.atziri": "Atziri's Chamber",
         "external.entrance": "Foyer",
+        "cards.empty": "Empty",
+        "palette.core": "Core",
+        "palette.rewards": "Rewards",
+        "palette.value": "Value",
+        "palette.support": "Support",
         "legend.add": "Add",
         "legend.best": "Best",
         "legend.good": "Good",
@@ -928,7 +1103,9 @@
         "legend.keep": "Keep",
         "legend.protect": "Protect",
         "legend.conflict": "Conflict",
-        "tier.auto": "Auto T{tier} from adjacent rooms: {sources}",
+        "tier.auto": "Estimated T{tier}: {sources}",
+        "tier.panel.title": "Tier Sources",
+        "tier.panel.empty": "No rooms are above T1 yet.",
         "advice.title": "Route Advice",
         "advice.subtitle": "From current board",
         "json.title": "Board JSON",
@@ -951,6 +1128,12 @@
         "room.smithy": "Smithy",
         "room.corruption": "Corruption Chamber",
         "room.flesh": "Flesh Surgeon",
+        "room.commander": "Commander",
+        "room.armoury": "Armoury",
+        "room.golem": "Golem Works",
+        "room.synthflesh": "Synthflesh Lab",
+        "room.legion": "Legion Barracks",
+        "room.transcendent": "Transcendent Barracks",
         "score.empty": "No board yet",
         "score.emptyText": "Place the Architect and evaluate to see route, protection, and reward-room changes.",
         "score.ready": "Ready to run",
@@ -968,8 +1151,8 @@
         "advice.conflict.body": "{cells} would hurt to overwrite. Move it to a side pocket, or treat that cell as protected route.",
         "advice.protect.title": "Juatalotli candidates",
         "advice.protect.body": "Prioritize {cells}. Protect route junctions or T3 value rooms.",
-        "advice.autoTier.title": "Adjacent tier increase",
-        "advice.autoTier.body": "{cells} are displayed above T1 from adjacent room-card influence. This is board-derived, not a right-click override.",
+        "advice.autoTier.title": "Automatic tier increase",
+        "advice.autoTier.body": "{cells} are displayed above T1 from cards matching PoE2DB upgrade sources. This is board-derived, not a right-click override.",
         "advice.reward.title": "Architect reward rooms",
         "advice.reward.body": "If Kishara's Vault / Vault of Reverence / Tablet Research Vault / Ancient Reliquary Vault appears, place it in an outer side pocket next to the spine for 0.5.",
         "advice.spine.title": "Fill the spine first",
@@ -992,32 +1175,40 @@
         "reason.reward": "Prioritizes outer side pockets next to the spine for Vault rewards you want to preserve.",
         "reason.value": "Prioritizes side pockets that do not block the spine and can be protected later.",
         "reason.generator": "Prioritizes cells near value rooms or Smithy/Flesh Surgeon with useful nearby space.",
+        "reason.upgrade": "Prioritizes adjacent cells that can become Tier sources for existing rooms.",
         "reason.default": "Prioritizes empty cells that are neither too close to nor too far from the spine."
       }
     };
 
     const roomTypes = [
-      ["empty", "room.empty", "i-empty"],
-      ["path", "room.path", "i-path"],
-      ["architect", "room.architect", "i-architect"],
-      ["access", "room.access", "i-access"],
-      ["currency", "room.currency", "i-currency"],
-      ["lineage", "room.lineage", "i-lineage"],
-      ["tablets", "room.tablets", "i-tablets"],
-      ["unique", "room.unique", "i-unique"],
-      ["treasure", "room.treasure", "i-treasure"],
-      ["alchemy", "room.alchemy", "i-alchemy"],
-      ["sacrifice", "room.sacrifice", "i-sacrifice"],
-      ["thaum", "room.thaum", "i-thaum"],
-      ["spymaster", "room.spymaster", "i-spymaster"],
-      ["generator", "room.generator", "i-generator"],
-      ["garrison", "room.garrison", "i-garrison"],
-      ["smithy", "room.smithy", "i-smithy"],
-      ["corruption", "room.corruption", "i-corruption"],
-      ["flesh", "room.flesh", "i-flesh"]
+      ["empty", "room.empty", "i-empty", "core"],
+      ["path", "room.path", "i-path", "core"],
+      ["architect", "room.architect", "i-architect", "core"],
+      ["access", "room.access", "i-access", "core"],
+      ["currency", "room.currency", "i-currency", "rewards"],
+      ["lineage", "room.lineage", "i-lineage", "rewards"],
+      ["tablets", "room.tablets", "i-tablets", "rewards"],
+      ["unique", "room.unique", "i-unique", "rewards"],
+      ["treasure", "room.treasure", "i-treasure", "rewards"],
+      ["alchemy", "room.alchemy", "i-alchemy", "value"],
+      ["sacrifice", "room.sacrifice", "i-sacrifice", "value"],
+      ["thaum", "room.thaum", "i-thaum", "value"],
+      ["spymaster", "room.spymaster", "i-spymaster", "value"],
+      ["generator", "room.generator", "i-generator", "value"],
+      ["smithy", "room.smithy", "i-smithy", "value"],
+      ["corruption", "room.corruption", "i-corruption", "value"],
+      ["flesh", "room.flesh", "i-flesh", "value"],
+      ["garrison", "room.garrison", "i-garrison", "support"],
+      ["commander", "room.commander", "i-commander", "support"],
+      ["armoury", "room.armoury", "i-armoury", "support"],
+      ["golem", "room.golem", "i-golem", "support"],
+      ["synthflesh", "room.synthflesh", "i-synthflesh", "support"],
+      ["legion", "room.legion", "i-legion", "support"],
+      ["transcendent", "room.transcendent", "i-transcendent", "support"]
     ];
 
-    const roomMeta = Object.fromEntries(roomTypes.map(([id, labelKey, icon]) => [id, { id, labelKey, icon }]));
+    const paletteCategories = ["core", "rewards", "value", "support"];
+    const roomMeta = Object.fromEntries(roomTypes.map(([id, labelKey, icon, category]) => [id, { id, labelKey, icon, category }]));
     const roomNamesByTier = {
       ja: {
         path: ["通路"],
@@ -1036,7 +1227,13 @@
         garrison: ["衛兵詰所", "兵舎", "戦争の間", "戦士の詰め所"],
         smithy: ["青銅工房", "鉄の間", "黄金工房", "無垢なる鍛冶場"],
         corruption: ["深紅のホール", "穢れの触媒", "穢れの中枢", "穢れの歓喜"],
-        flesh: ["外科の病棟", "外科の手術室", "外科の交響曲", "外科的栄光"]
+        flesh: ["外科の病棟", "外科の手術室", "外科の交響曲", "外科的栄光"],
+        commander: ["司令官の間", "司令官のホール", "司令官の軍団司令部", "司令官の駐屯所"],
+        armoury: ["保管場所", "武器庫", "展示室", "王家の備蓄庫"],
+        golem: ["Workshop", "Automaton Lab", "Stone Legion", "Precision of Science"],
+        synthflesh: ["義肢研究", "合成肉の聖所", "超越のるつぼ", "機能の至高"],
+        legion: ["軍団の兵舎", "ヴァイパーの側近", "精鋭軍団", "比類なき軍団兵"],
+        transcendent: ["超越の兵舎", "鉄肉の広間", "統合の軍団", "完成されしものの間"]
       },
       en: {
         path: ["Path"],
@@ -1055,18 +1252,48 @@
         garrison: ["Guardhouse", "Barracks", "Hall of War", "Warrior Assembly"],
         smithy: ["Bronzeworks", "Chamber of Iron", "Golden Forge", "Immaculate Forge"],
         corruption: ["Crimson Hall", "Catalyst of Corruption", "Locus of Corruption", "Rapture of Corruption"],
-        flesh: ["Surgeon's Ward", "Surgeon's Theatre", "Surgeon's Symphony", "Surgical Glory"]
+        flesh: ["Surgeon's Ward", "Surgeon's Theatre", "Surgeon's Symphony", "Surgical Glory"],
+        commander: ["Commander's Chamber", "Commander's Hall", "Commander's Headquarters", "Commander's Station"],
+        armoury: ["Depot", "Arsenal", "Gallery", "Royal Reserves"],
+        golem: ["Workshop", "Automaton Lab", "Stone Legion", "Precision of Science"],
+        synthflesh: ["Prosthetic Research", "Synthflesh Sanctum", "Crucible of Transcendence", "Supremacy of Function"],
+        legion: ["Legion Barracks", "Viper's Loyals", "Elite Legion", "Unmatched Legionnaires"],
+        transcendent: ["Transcendent Barracks", "Steelflesh Quarters", "Collective Legion", "Chamber of the Perfected"]
       }
     };
-    const valueRooms = new Set(["currency", "lineage", "tablets", "unique", "treasure", "alchemy", "sacrifice", "thaum", "spymaster", "generator", "smithy", "corruption", "flesh", "garrison"]);
+    const valueRooms = new Set(roomTypes.map(([id]) => id).filter(id => !["empty", "path", "architect", "access"].includes(id)));
     const rewardRooms = new Set(["currency", "lineage", "tablets", "unique"]);
     const premiumRooms = new Set(["currency", "lineage", "tablets", "unique", "treasure", "alchemy", "sacrifice", "thaum"]);
     const structuralRooms = new Set(["empty", "path", "architect", "access"]);
+    const supportRooms = new Set(["garrison", "commander", "armoury", "golem", "synthflesh", "legion", "transcendent"]);
+    const upgradeRules = {
+      garrison: [{ sources: ["commander", "armoury"], count: 1 }],
+      commander: [{ sources: ["garrison"], count: 3 }, { sources: ["transcendent"], count: 3 }],
+      armoury: [{ sources: ["smithy", "alchemy"], count: 1 }],
+      smithy: [{ sources: ["golem"], count: 1 }],
+      generator: [{ sources: ["thaum", "sacrifice"], count: 1 }],
+      spymaster: [{ sources: ["spymaster"], count: 1, scope: "global", excludeSelf: true }],
+      legion: [{ sources: ["armoury", "spymaster"], count: 1 }],
+      synthflesh: [{ sources: ["flesh"], count: 1 }],
+      flesh: [{ sources: ["synthflesh"], count: 1 }],
+      transcendent: [{ sources: ["synthflesh"], count: 1 }],
+      alchemy: [{ sources: ["thaum"], count: 2 }],
+      thaum: [{ sources: ["sacrifice"], count: 1 }],
+      corruption: [{ sources: ["thaum", "sacrifice"], count: 1 }]
+    };
+    const roomRequirements = {
+      smithy: { sources: ["generator"], count: 1 },
+      synthflesh: { sources: ["generator"], count: 1 },
+      transcendent: { sources: ["generator"], count: 1 },
+      golem: { sources: ["generator"], count: 2 }
+    };
     const rows = 9;
     const cols = 9;
     const storageKey = "poe-temple-advisor:v1:local-state";
     const legacyLangKey = "templeAdvisorLang";
     let selectedRoom = "path";
+    let offeredCards = [];
+    let paletteCategory = "core";
     let markMode = null;
     let board = makeEmptyBoard();
     let suggestions = new Map();
@@ -1076,8 +1303,11 @@
 
     const boardEl = document.getElementById("board");
     const paletteEl = document.getElementById("palette");
+    const paletteTabsEl = document.getElementById("paletteTabs");
+    const offeredCardsEl = document.getElementById("offeredCards");
     const placementAssistEl = document.getElementById("placementAssist");
     const adviceList = document.getElementById("adviceList");
+    const tierDetailEl = document.getElementById("tierDetail");
 
     function t(key, vars = {}) {
       const dict = translations[currentLang] || translations.ja;
@@ -1165,11 +1395,21 @@
       }));
     }
 
+    function normalizeOfferedCards(candidate) {
+      if (!Array.isArray(candidate)) return [];
+      return candidate
+        .filter(type => roomMeta[type] && type !== "empty")
+        .slice(0, 3);
+    }
+
     function loadLocalState() {
       const state = readLocalState();
       if (!state) return false;
       if (state.language && translations[state.language]) currentLang = state.language;
       if (isBoardState(state.board)) board = normalizeBoardState(state.board);
+      offeredCards = normalizeOfferedCards(state.offeredCards);
+      if (state.paletteCategory && paletteCategories.includes(state.paletteCategory)) paletteCategory = state.paletteCategory;
+      if (state.selectedRoom && roomMeta[state.selectedRoom]) selectedRoom = state.selectedRoom;
       if (state.protectCount !== undefined) {
         const protectCount = Math.max(0, Math.min(6, Number(state.protectCount) || 0));
         document.getElementById("protectCount").value = protectCount;
@@ -1183,11 +1423,14 @@
     function saveLocalState() {
       try {
         localStorage.setItem(storageKey, JSON.stringify({
-          version: 2,
+          version: 3,
           savedAt: new Date().toISOString(),
           language: currentLang,
           protectCount: Number(document.getElementById("protectCount").value || 0),
           valueGoal: document.getElementById("valueGoal").value,
+          selectedRoom,
+          offeredCards,
+          paletteCategory,
           board
         }));
         localStorage.setItem(legacyLangKey, currentLang);
@@ -1217,16 +1460,45 @@
         .filter(([nr, nc]) => inBounds(nr, nc));
     }
 
+    function sourceMatches(type, rule, r, c) {
+      const cells = rule.scope === "global"
+        ? allBoardCells().filter(([nr, nc]) => !(rule.excludeSelf && nr === r && nc === c))
+        : adjacentCells(r, c);
+      return cells.filter(([nr, nc]) => rule.sources.includes(board[nr][nc].type));
+    }
+
+    function allBoardCells() {
+      const cells = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) cells.push([r, c]);
+      }
+      return cells;
+    }
+
+    function ruleContribution(rule, matches) {
+      return Math.floor(matches.length / Math.max(1, rule.count || 1));
+    }
+
     function computeTierMap() {
       const out = new Map();
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           const cell = board[r][c];
           if (!isTieredRoomType(cell.type)) continue;
-          const sources = adjacentCells(r, c).filter(([nr, nc]) => !structuralRooms.has(board[nr][nc].type));
+          const rules = upgradeRules[cell.type] || [];
+          const sources = [];
+          let tierGain = 0;
+          for (const rule of rules) {
+            const matches = sourceMatches(cell.type, rule, r, c);
+            const gain = ruleContribution(rule, matches);
+            if (!gain) continue;
+            tierGain += gain;
+            sources.push(...matches.slice(0, gain * Math.max(1, rule.count || 1)));
+          }
           out.set(key(r, c), {
-            tier: Math.min(4, 1 + sources.length),
-            sources
+            tier: Math.min(4, 1 + tierGain),
+            sources,
+            rules
           });
         }
       }
@@ -1249,9 +1521,63 @@
       });
     }
 
+    function buildTierSourceSet(tierMap) {
+      const out = new Set();
+      for (const info of tierMap.values()) {
+        if (info.tier <= 1) continue;
+        for (const [r, c] of info.sources) out.add(key(r, c));
+      }
+      return out;
+    }
+
+    function tierDetailRows(tierMap) {
+      return [...tierMap.entries()]
+        .map(([k, info]) => ({ key: k, info, cell: boardCellFromKey(k) }))
+        .filter(row => row.info.tier > 1 && row.cell.type !== "empty")
+        .sort((a, b) => b.info.tier - a.info.tier || a.key.localeCompare(b.key))
+        .slice(0, 8);
+    }
+
+    function boardCellFromKey(k) {
+      const [r, c] = parseKey(k);
+      return board[r][c];
+    }
+
+    function renderTierDetails(tierMap) {
+      const rows = tierDetailRows(tierMap);
+      if (!rows.length) {
+        tierDetailEl.innerHTML = `<p class="tier-empty">${escapeHtml(t("tier.panel.empty"))}</p>`;
+        return;
+      }
+      tierDetailEl.innerHTML = rows.map(({ key: cellKey, info, cell }) => {
+        const [r, c] = parseKey(cellKey);
+        const sources = info.sources.map(tierSourceLabel).join(", ");
+        return `
+          <div class="tier-row">
+            <div class="badge">T${info.tier}</div>
+            <div><strong>${escapeHtml(coord([r, c]))} ${escapeHtml(roomDisplayName(cell.type, info.tier))}</strong><br>${escapeHtml(sources)}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderPaletteTabs() {
+      paletteTabsEl.innerHTML = paletteCategories.map(category => `
+        <button class="${paletteCategory === category ? "active" : ""}" data-category="${category}" type="button">${escapeHtml(t(`palette.${category}`))}</button>
+      `).join("");
+      paletteTabsEl.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          paletteCategory = btn.dataset.category;
+          renderAll();
+          saveLocalState();
+        });
+      });
+    }
+
     function renderPalette() {
-      paletteEl.innerHTML = roomTypes.map(([id]) => {
-        const label = id === "empty" ? roomTypeLabel(id) : roomTypeLabel(id);
+      const visibleRooms = roomTypes.filter(([id, , , category]) => category === paletteCategory || id === selectedRoom);
+      paletteEl.innerHTML = visibleRooms.map(([id]) => {
+        const label = roomTypeLabel(id);
         const title = id === "empty" ? label : roomTitle(id, 1);
         return `
         <button class="palette-button ${selectedRoom === id ? "active" : ""}" data-room="${id}" title="${escapeHtml(title)}">
@@ -1265,14 +1591,54 @@
           selectedRoom = btn.dataset.room;
           markMode = null;
           renderAll();
+          saveLocalState();
         });
       });
+    }
+
+    function renderOfferedCards() {
+      const slots = Array.from({ length: 3 }, (_, index) => offeredCards[index] || null);
+      offeredCardsEl.innerHTML = slots.map((type, index) => {
+        if (!type) {
+          return `<button class="offered-card empty" type="button" disabled><span class="mini-label">${escapeHtml(t("cards.empty"))}</span></button>`;
+        }
+        return `
+          <button class="offered-card ${selectedRoom === type ? "active" : ""}" type="button" data-room="${type}" title="${escapeHtml(roomTitle(type, 1))}">
+            ${icon(type)}
+            <span class="mini-label">${escapeHtml(roomTypeLabel(type))}</span>
+          </button>
+        `;
+      }).join("");
+      offeredCardsEl.querySelectorAll("button[data-room]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          selectedRoom = btn.dataset.room;
+          markMode = null;
+          renderAll();
+          saveLocalState();
+        });
+      });
+    }
+
+    function addSelectedOfferedCard() {
+      if (selectedRoom === "empty" || !roomMeta[selectedRoom]) return;
+      offeredCards = offeredCards.filter(type => type !== selectedRoom);
+      if (offeredCards.length >= 3) offeredCards.shift();
+      offeredCards.push(selectedRoom);
+      renderAll();
+      saveLocalState();
+    }
+
+    function clearOfferedCards() {
+      offeredCards = [];
+      renderAll();
+      saveLocalState();
     }
 
     function renderBoard() {
       boardEl.innerHTML = "";
       const placementHints = placementHintsForSelection();
       const tierMap = computeTierMap();
+      const tierSourceSet = buildTierSourceSet(tierMap);
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           const cell = board[r][c];
@@ -1283,6 +1649,7 @@
           const classes = ["cell"];
           if (cell.type !== "empty") classes.push("has-room", `room-${cell.type}`);
           if (tierInfo?.sources.length) classes.push("auto-tiered");
+          if (tierSourceSet.has(key(r, c))) classes.push("tier-source");
           if (sug?.kind) classes.push(`suggest-${sug.kind}`);
           if (sug?.protect) classes.push("suggest-protect");
           if (placement) classes.push("place-hint", `place-${placement.kind}`);
@@ -1309,6 +1676,7 @@
         }
       }
       renderPlacementAssist(placementHints);
+      renderTierDetails(tierMap);
     }
 
     function paintCell(r, c) {
@@ -1328,6 +1696,8 @@
     }
 
     function renderAll() {
+      renderOfferedCards();
+      renderPaletteTabs();
       renderPalette();
       renderBoard();
       document.getElementById("protectMode").classList.toggle("active", markMode === "protect");
@@ -1430,6 +1800,27 @@
       return cell.type === "path" && !routeSet.has(key(r, c));
     }
 
+    function upgradeImpactScore(type, r, c) {
+      let score = 0;
+      for (const [nr, nc] of adjacentCells(r, c)) {
+        const targetType = board[nr][nc].type;
+        if (!targetType || targetType === "empty") continue;
+        const rules = upgradeRules[targetType] || [];
+        if (rules.some(rule => rule.scope !== "global" && rule.sources.includes(type))) {
+          score += premiumRooms.has(targetType) ? 34 : supportRooms.has(targetType) ? 26 : 22;
+        }
+      }
+      if (type === "spymaster" && findCells("spymaster").length) score += 24;
+      return score;
+    }
+
+    function requirementFitScore(type, r, c) {
+      const requirement = roomRequirements[type];
+      if (!requirement) return 0;
+      const nearby = adjacentCells(r, c).filter(([nr, nc]) => requirement.sources.includes(board[nr][nc].type)).length;
+      return nearby >= requirement.count ? 24 : nearby * 8;
+    }
+
     function scorePlacement(type, tier, r, c, context) {
       const { arch, access, route, routeSet, pocketRank } = context;
       const k = key(r, c);
@@ -1438,6 +1829,8 @@
       const outerBonus = isOuterCell(r, c) ? 13 : 0;
       const topBonus = Math.max(0, 8 - r);
       const emptyBonus = cell.type === "empty" ? 14 : -12;
+      const upgradeImpact = upgradeImpactScore(type, r, c);
+      const requirementFit = requirementFitScore(type, r, c);
       let score = 0;
       let reasonKey = "reason.default";
 
@@ -1466,6 +1859,11 @@
         score = scoreSidePocket(r, c, routeDistance, pocketRank, routeSet) + emptyBonus;
       }
 
+      if (upgradeImpact) {
+        score += upgradeImpact;
+        if (reasonKey === "reason.default") reasonKey = "reason.upgrade";
+      }
+      if (requirementFit) score += requirementFit;
       if (routeSet.has(k) && type !== "path" && type !== "architect" && type !== "access") score -= 80;
       if (cell.type !== "empty") score -= 18;
       return { r, c, score, reasonKey };
@@ -1722,7 +2120,7 @@
     }
 
     function exportBoard() {
-      document.getElementById("boardJson").value = JSON.stringify({ version: 2, board }, null, 2);
+      document.getElementById("boardJson").value = JSON.stringify({ version: 3, board, offeredCards, selectedRoom, paletteCategory }, null, 2);
     }
 
     function importBoard() {
@@ -1731,6 +2129,9 @@
         if (!Array.isArray(parsed.board) || parsed.board.length !== rows) throw new Error("Invalid board");
         if (!isBoardState(parsed.board)) throw new Error("Invalid board");
         board = normalizeBoardState(parsed.board);
+        offeredCards = normalizeOfferedCards(parsed.offeredCards);
+        if (parsed.selectedRoom && roomMeta[parsed.selectedRoom]) selectedRoom = parsed.selectedRoom;
+        if (parsed.paletteCategory && paletteCategories.includes(parsed.paletteCategory)) paletteCategory = parsed.paletteCategory;
         suggestions.clear();
         renderAll();
         exportBoard();
@@ -1759,6 +2160,8 @@
     document.getElementById("clearBoard").addEventListener("click", clearBoard);
     document.getElementById("exportJson").addEventListener("click", exportBoard);
     document.getElementById("importJson").addEventListener("click", importBoard);
+    document.getElementById("addOfferedCard").addEventListener("click", addSelectedOfferedCard);
+    document.getElementById("clearOfferedCards").addEventListener("click", clearOfferedCards);
     document.getElementById("protectCount").addEventListener("change", evaluateBoard);
     document.getElementById("valueGoal").addEventListener("change", evaluateBoard);
 
