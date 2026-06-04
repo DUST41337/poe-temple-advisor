@@ -1,0 +1,1384 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PoE2 Temple Advisor</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #111214;
+      --panel: #18191c;
+      --panel-2: #202225;
+      --line: #35383d;
+      --text: #edf2f7;
+      --muted: #9ca8b7;
+      --accent: #4fb3a3;
+      --accent-2: #e2b761;
+      --danger: #e25f5f;
+      --blue: #65a7df;
+      --green: #79c56e;
+      --purple: #9b88e8;
+      --tile: #292b2f;
+      --tile-empty: #141518;
+      --shadow: rgba(0, 0, 0, 0.28);
+      font-family: Inter, "Segoe UI", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.025), transparent 220px),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    button, textarea, select, input {
+      font: inherit;
+    }
+
+    a {
+      color: #8bc8ff;
+      text-decoration: none;
+    }
+
+    a:hover { text-decoration: underline; }
+
+    .app {
+      display: grid;
+      grid-template-columns: minmax(250px, 310px) minmax(420px, 1fr) minmax(300px, 380px);
+      gap: 14px;
+      padding: 14px;
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 18px 40px var(--shadow);
+      min-width: 0;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,0.025);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .lang-toggle {
+      color: var(--text);
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      border-radius: 7px;
+      min-height: 34px;
+      padding: 0 10px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    h1, h2 {
+      margin: 0;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      font-size: 17px;
+      font-weight: 750;
+    }
+
+    h2 {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 650;
+      text-transform: uppercase;
+    }
+
+    .tool-section {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .tool-section > h2 {
+      margin-bottom: 9px;
+    }
+
+    .tool-section:last-child { border-bottom: 0; }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .segmented button,
+    .action-row button,
+    .small-button,
+    .icon-button {
+      color: var(--text);
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      border-radius: 7px;
+      min-height: 34px;
+      cursor: pointer;
+    }
+
+    .segmented button.active,
+    .small-button.active {
+      border-color: var(--accent);
+      background: rgba(79, 179, 163, 0.18);
+      color: #d9fff8;
+    }
+
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .palette-button {
+      height: 54px;
+      border-radius: 7px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      gap: 2px;
+      padding: 5px 2px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .palette-button.active {
+      border-color: var(--accent);
+      outline: 2px solid rgba(79, 179, 163, 0.22);
+    }
+
+    .palette-button .mini-label {
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .tile-icon {
+      width: 24px;
+      height: 24px;
+      display: block;
+    }
+
+    .tile-icon svg {
+      width: 100%;
+      height: 100%;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .room-empty { color: #6d7785; }
+    .room-path { color: #c5cfda; }
+    .room-architect { color: #d9955c; }
+    .room-access { color: #f0d073; }
+    .room-currency { color: #e6c46c; }
+    .room-lineage { color: #a78cff; }
+    .room-tablets { color: #74b9ff; }
+    .room-unique { color: #d989dc; }
+    .room-treasure { color: #f0ad61; }
+    .room-alchemy { color: #79d487; }
+    .room-sacrifice { color: #e17676; }
+    .room-thaum { color: #69d0d8; }
+    .room-spymaster { color: #b197fc; }
+    .room-generator { color: #ffd166; }
+    .room-garrison { color: #87d37c; }
+    .room-smithy { color: #b0bac8; }
+    .room-corruption { color: #ff7b9c; }
+    .room-flesh { color: #f28f73; }
+
+    .board-wrap {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: calc(100vh - 28px);
+    }
+
+    .board-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .action-row button {
+      padding: 0 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .board-shell {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 7px;
+      justify-items: center;
+      width: 100%;
+    }
+
+    .external-room {
+      width: min(100%, 640px);
+      min-height: 54px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #151b24;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: var(--muted);
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(9, minmax(40px, 1fr));
+      gap: 5px;
+      width: min(100%, 640px);
+      aspect-ratio: 1;
+      padding: 6px;
+      border-radius: 8px;
+      background: #0c0d0f;
+      border: 1px solid var(--line);
+    }
+
+    .cell {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: var(--tile-empty);
+      border-radius: 7px;
+      min-width: 0;
+      min-height: 0;
+      padding: 4px;
+      color: var(--muted);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      position: relative;
+      isolation: isolate;
+    }
+
+    .cell:hover {
+      border-color: rgba(255,255,255,0.28);
+    }
+
+    .cell.has-room {
+      background: var(--tile);
+    }
+
+    .cell.suggest-add {
+      outline: 2px solid rgba(101, 167, 223, 0.72);
+      outline-offset: -2px;
+    }
+
+    .cell.suggest-keep {
+      outline: 2px solid rgba(121, 197, 110, 0.55);
+      outline-offset: -2px;
+    }
+
+    .cell.suggest-warn {
+      outline: 2px solid rgba(226, 95, 95, 0.72);
+      outline-offset: -2px;
+    }
+
+    .cell.suggest-protect {
+      box-shadow: inset 0 0 0 2px rgba(226, 183, 97, 0.95);
+    }
+
+    .cell .tile-icon {
+      width: clamp(21px, 5vw, 34px);
+      height: clamp(21px, 5vw, 34px);
+    }
+
+    .tier {
+      position: absolute;
+      right: 4px;
+      bottom: 3px;
+      min-width: 18px;
+      height: 17px;
+      padding: 0 3px;
+      border-radius: 5px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.12);
+      font-size: 10px;
+      line-height: 15px;
+      color: #e9eef6;
+      text-align: center;
+    }
+
+    .mark {
+      position: absolute;
+      left: 4px;
+      top: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      display: grid;
+      place-items: center;
+      background: rgba(0,0,0,0.54);
+      border: 1px solid rgba(255,255,255,0.13);
+      color: var(--accent-2);
+    }
+
+    .coord {
+      position: absolute;
+      left: 5px;
+      bottom: 3px;
+      color: rgba(255,255,255,0.32);
+      font-size: 9px;
+    }
+
+    .hintbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      width: min(100%, 640px);
+      justify-content: center;
+    }
+
+    .legend {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .legend-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      border: 2px solid currentColor;
+    }
+
+    .legend-dot.add { color: var(--blue); }
+    .legend-dot.keep { color: var(--green); }
+    .legend-dot.warn { color: var(--danger); }
+    .legend-dot.protect { color: var(--accent-2); }
+
+    .side-body {
+      padding: 12px 14px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .score-card {
+      display: grid;
+      grid-template-columns: 76px 1fr;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .score-ring {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at center, var(--panel-2) 54%, transparent 55%),
+        conic-gradient(var(--accent) var(--score, 0deg), rgba(255,255,255,0.08) 0);
+      border: 1px solid rgba(255,255,255,0.1);
+      font-weight: 800;
+    }
+
+    .score-card strong {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 3px;
+    }
+
+    .score-card span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .advice-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .advice {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-2);
+      padding: 10px;
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 9px;
+    }
+
+    .advice .badge {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,0.06);
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .advice strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 13px;
+    }
+
+    .advice p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 88px;
+      resize: vertical;
+      background: #101113;
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .links {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .input-line {
+      display: grid;
+      grid-template-columns: 1fr 70px;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .input-line label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .input-line input {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #101113;
+      color: var(--text);
+      border-radius: 7px;
+      min-height: 32px;
+      padding: 0 8px;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 1120px) {
+      .app {
+        grid-template-columns: minmax(240px, 300px) 1fr;
+      }
+      .right-panel {
+        grid-column: 1 / -1;
+      }
+      .board-wrap {
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        grid-template-columns: 1fr;
+        padding: 10px;
+      }
+      .board {
+        gap: 3px;
+        padding: 4px;
+      }
+      .cell {
+        border-radius: 5px;
+        padding: 2px;
+      }
+      .palette {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute">
+    <symbol id="i-empty" viewBox="0 0 24 24"><path d="M5 5h14v14H5z"/><path d="M8 8l8 8M16 8l-8 8"/></symbol>
+    <symbol id="i-path" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/><path d="M7 7l10 10M17 7L7 17" opacity=".45"/></symbol>
+    <symbol id="i-architect" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 20V9l5-5 5 5v11"/><path d="M10 20v-6h4v6"/><path d="M9 10h6"/></symbol>
+    <symbol id="i-access" viewBox="0 0 24 24"><circle cx="8" cy="8" r="4"/><path d="M11 11l8 8M15 15l2-2M17 17l2-2"/></symbol>
+    <symbol id="i-currency" viewBox="0 0 24 24"><ellipse cx="9" cy="7" rx="5" ry="3"/><path d="M4 7v7c0 1.7 2.2 3 5 3s5-1.3 5-3V7"/><path d="M10 14c.9 1.1 2.7 1.8 5 1.8 2.8 0 5-1.3 5-3v-4"/><path d="M15 6c2.8 0 5 1.3 5 3s-2.2 3-5 3"/></symbol>
+    <symbol id="i-lineage" viewBox="0 0 24 24"><path d="M12 3l7 6-7 12L5 9z"/><path d="M5 9h14M9 9l3 12 3-12M9 9l3-6 3 6"/></symbol>
+    <symbol id="i-tablets" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></symbol>
+    <symbol id="i-unique" viewBox="0 0 24 24"><path d="M12 3l8 5v8l-8 5-8-5V8z"/><path d="M12 3v18M4 8l8 5 8-5"/></symbol>
+    <symbol id="i-treasure" viewBox="0 0 24 24"><path d="M4 10h16v9H4z"/><path d="M6 10V8a6 6 0 0 1 12 0v2"/><path d="M4 14h16M12 10v9"/></symbol>
+    <symbol id="i-alchemy" viewBox="0 0 24 24"><path d="M9 3h6M10 3v5l-5 9a3 3 0 0 0 2.6 4.5h8.8A3 3 0 0 0 19 17l-5-9V3"/><path d="M7 16h10"/></symbol>
+    <symbol id="i-sacrifice" viewBox="0 0 24 24"><path d="M5 18h14M7 18l2-9h6l2 9"/><path d="M9 9l3-6 3 6"/><path d="M10 13h4"/></symbol>
+    <symbol id="i-thaum" viewBox="0 0 24 24"><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/><path d="M5 5l3.5 3.5M15.5 15.5L19 19M19 5l-3.5 3.5M8.5 15.5L5 19"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-spymaster" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 20l16-16" opacity=".5"/></symbol>
+    <symbol id="i-generator" viewBox="0 0 24 24"><path d="M13 2L5 14h6l-1 8 9-13h-6z"/></symbol>
+    <symbol id="i-garrison" viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.4 8.4-8 9-4.6-.6-8-4-8-9V7z"/><path d="M9 12l2 2 4-5"/></symbol>
+    <symbol id="i-smithy" viewBox="0 0 24 24"><path d="M4 17h12c2 0 4-2 4-4h-6V8H8v5H4z"/><path d="M8 17v3h8v-3"/><path d="M9 5h6"/></symbol>
+    <symbol id="i-corruption" viewBox="0 0 24 24"><path d="M12 3c4 2 6 5 6 9a6 6 0 0 1-12 0c0-4 2-7 6-9z"/><path d="M8 12c3 1 5 1 8 0"/><path d="M10 16c1.5-.8 2.5-.8 4 0"/></symbol>
+    <symbol id="i-flesh" viewBox="0 0 24 24"><path d="M8 12V6a2 2 0 1 1 4 0v5"/><path d="M12 11V5a2 2 0 1 1 4 0v8"/><path d="M16 13l2-3a2 2 0 1 1 3 2l-4 7H9l-4-5a2 2 0 0 1 3-3l2 2"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+    <symbol id="i-evaluate" viewBox="0 0 24 24"><path d="M4 13l4 4L20 5"/><path d="M4 5h9"/></symbol>
+  </svg>
+
+  <main class="app">
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h1 data-i18n="app.title">Temple Advisor</h1>
+          <h2 data-i18n="app.mode">0.5 Boss / Reward</h2>
+        </div>
+        <div class="header-actions">
+          <button class="lang-toggle" id="langToggle" type="button">English</button>
+        </div>
+      </div>
+
+      <div class="tool-section">
+        <h2 data-i18n="section.tier">Tier</h2>
+        <div class="segmented" id="tierButtons">
+          <button data-tier="1">I</button>
+          <button data-tier="2">II</button>
+          <button data-tier="3" class="active">III</button>
+        </div>
+      </div>
+
+      <div class="tool-section">
+        <h2 data-i18n="section.palette">Palette</h2>
+        <div class="palette" id="palette"></div>
+      </div>
+
+      <div class="tool-section">
+        <h2 data-i18n="section.marks">Marks</h2>
+        <div class="action-row">
+          <button class="small-button" id="protectMode"><span class="tile-icon"><svg><use href="#i-lock"></use></svg></span><span data-i18n="mark.protect">Protect</span></button>
+          <button class="small-button" id="upgradeMode"><span class="tile-icon"><svg><use href="#i-arrow"></use></svg></span><span data-i18n="mark.upgrade">Upgrade</span></button>
+        </div>
+      </div>
+
+      <div class="tool-section">
+        <h2 data-i18n="section.options">Options</h2>
+        <div class="input-line">
+          <label for="protectCount">Juatalotli</label>
+          <input id="protectCount" type="number" min="0" max="6" value="2">
+        </div>
+        <div class="input-line">
+          <label for="valueGoal" data-i18n="label.goal">Goal</label>
+          <select id="valueGoal" class="small-button">
+            <option value="hybrid" data-i18n="goal.hybrid">Boss + Vault</option>
+            <option value="boss" data-i18n="goal.boss">Atziri Rush</option>
+            <option value="value" data-i18n="goal.value">Reward Rooms</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="tool-section links">
+        <a href="https://sulozor.github.io/#/atziri-temple" target="_blank" rel="noreferrer">Sulo Atziri Temple</a>
+        <a href="https://poe2temple.blog/" target="_blank" rel="noreferrer">PoE2 Temple Planner</a>
+        <a href="https://www.poe2wiki.net/wiki/Temple_of_Atziri" target="_blank" rel="noreferrer">PoE2 Wiki: Temple</a>
+      </div>
+    </section>
+
+    <section class="panel board-wrap">
+      <div class="board-toolbar">
+        <div>
+          <h1 data-i18n="board.title">Current Board</h1>
+          <h2 data-i18n="board.subtitle">Click cells to paint rooms</h2>
+        </div>
+        <div class="action-row">
+          <button id="evaluate"><span class="tile-icon"><svg><use href="#i-evaluate"></use></svg></span><span data-i18n="action.evaluate">Evaluate</span></button>
+          <button id="loadPreset" data-i18n="action.preset">Preset</button>
+          <button id="clearBoard" data-i18n="action.clear">Clear</button>
+        </div>
+      </div>
+
+      <div class="board-shell">
+        <div class="external-room room-unique"><span class="tile-icon"><svg><use href="#i-unique"></use></svg></span><span data-i18n="external.atziri">Atziri's Chamber</span></div>
+        <div class="board" id="board"></div>
+        <div class="external-room room-path"><span class="tile-icon"><svg><use href="#i-path"></use></svg></span><span data-i18n="external.entrance">Entrance</span></div>
+        <div class="hintbar">
+          <span class="legend"><span class="legend-dot add"></span><span data-i18n="legend.add">Add</span></span>
+          <span class="legend"><span class="legend-dot keep"></span><span data-i18n="legend.keep">Keep</span></span>
+          <span class="legend"><span class="legend-dot protect"></span><span data-i18n="legend.protect">Protect</span></span>
+          <span class="legend"><span class="legend-dot warn"></span><span data-i18n="legend.conflict">Conflict</span></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel right-panel">
+      <div class="panel-header">
+        <div>
+          <h1 data-i18n="advice.title">Route Advice</h1>
+          <h2 data-i18n="advice.subtitle">From current board</h2>
+        </div>
+      </div>
+      <div class="side-body">
+        <div class="score-card">
+          <div class="score-ring" id="scoreRing" style="--score: 0deg">0</div>
+          <div>
+            <strong id="scoreTitle">No board yet</strong>
+            <span id="scoreText">Architectを置いてEvaluateすると、幹線・保護・価値部屋の差分を出します。</span>
+          </div>
+        </div>
+        <div class="advice-list" id="adviceList"></div>
+        <div>
+          <h2 data-i18n="json.title">Board JSON</h2>
+          <textarea id="boardJson" spellcheck="false"></textarea>
+          <div class="action-row" style="margin-top:8px">
+            <button id="exportJson" data-i18n="action.export">Export</button>
+            <button id="importJson" data-i18n="action.import">Import</button>
+          </div>
+        </div>
+        <p class="footer-note" data-i18n="footer.note">
+          The icons are local schematic symbols for planning. They are not copied game assets.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const translations = {
+      ja: {
+        "app.title": "Temple Advisor",
+        "app.mode": "0.5 Boss / Reward",
+        "section.tier": "Tier",
+        "section.palette": "Palette",
+        "section.marks": "Marks",
+        "section.options": "Options",
+        "mark.protect": "保護",
+        "mark.upgrade": "育成",
+        "label.goal": "方針",
+        "goal.hybrid": "ボス + Vault",
+        "goal.boss": "Atziri直行",
+        "goal.value": "報酬部屋重視",
+        "board.title": "現在のボード",
+        "board.subtitle": "セルをクリックして部屋を配置",
+        "action.evaluate": "評価",
+        "action.preset": "プリセット",
+        "action.clear": "クリア",
+        "action.export": "Export",
+        "action.import": "Import",
+        "external.atziri": "Atziriの間",
+        "external.entrance": "入口",
+        "legend.add": "追加",
+        "legend.keep": "維持",
+        "legend.protect": "保護",
+        "legend.conflict": "競合",
+        "advice.title": "ルート助言",
+        "advice.subtitle": "現在のボードから",
+        "json.title": "Board JSON",
+        "footer.note": "アイコンは計画用のローカル模式図です。ゲーム内アセットのコピーではありません。",
+        "room.empty": "消去",
+        "room.path": "通路",
+        "room.architect": "Architect",
+        "room.access": "Access",
+        "room.currency": "Currency",
+        "room.lineage": "Lineage",
+        "room.tablets": "Tablet",
+        "room.unique": "Unique",
+        "room.treasure": "Treasure",
+        "room.alchemy": "Alchemy",
+        "room.sacrifice": "Sacrifice",
+        "room.thaum": "Thaum",
+        "room.spymaster": "Spy",
+        "room.generator": "Gen",
+        "room.garrison": "Garrison",
+        "room.smithy": "Smithy",
+        "room.corruption": "Corrupt",
+        "room.flesh": "Flesh",
+        "score.empty": "未評価",
+        "score.emptyText": "Architectを置いて評価すると、幹線・保護・価値部屋の差分を出します。",
+        "score.ready": "走れる形",
+        "score.readyText": "幹線と価値部屋がかなり整理されています。保護を入れて走れます。",
+        "score.repairable": "修復可能",
+        "score.repairableText": "幹線は見えています。Royal Accessか保護対象を整えると安定します。",
+        "score.spine": "幹線作成中",
+        "score.spineText": "まずArchitect位置と中央幹線を確定させる段階です。",
+        "advice.placeArchitect.title": "Architectを置く",
+        "advice.placeArchitect.body": "現在の固定Architect位置を盤面に置くと、Royal Accessまでの幹線を正確に出せます。",
+        "advice.placeArchitect.initial": "現在のTempleでArchitectがある位置をまず置いてください。そこから上方向にRoyal Access候補をつなぎます。",
+        "advice.royal.title": "Royal Access候補",
+        "advice.royal.body": "Architect後、{coord} 付近にRoyal Accessを置ける形を狙います。出現枠が違う場合は一番近い外周枠で代用。",
+        "advice.conflict.title": "幹線上の価値部屋",
+        "advice.conflict.body": "{cells} は消えると痛いので、横ポケットに逃がすか、ここを幹線扱いで守る判断にします。",
+        "advice.protect.title": "Juatalotli候補",
+        "advice.protect.body": "{cells} を優先。幹線ジャンクションかT3価値部屋を守ります。",
+        "advice.reward.title": "Architect報酬部屋",
+        "advice.reward.body": "Currency / Lineage / Tablets / Uniques Vaultが出たら、幹線横の外周寄りポケットに置くのが0.5向きです。",
+        "advice.spine.title": "幹線を先に埋める",
+        "advice.spine.body": "{count}マス分のPath候補があります。価値部屋より先にEntrance -> Architect -> Royal Accessをつなぐのが安定です。",
+        "advice.goal.boss.title": "Atziri寄せ",
+        "advice.goal.boss.body": "Royal Access後はAtziriを走り、通常価値部屋は2-3個に抑えます。過剰に部屋数を増やさない方が修復しやすいです。",
+        "advice.goal.value.title": "Reward寄せ",
+        "advice.goal.value.body": "Atziriは急がずArchitect報酬部屋とAlchemy/Sacrifice/Thaumaturgeを育てます。Royal Accessは置ける時だけで十分です。",
+        "advice.goal.hybrid.title": "Hybrid運用",
+        "advice.goal.hybrid.body": "Architect報酬部屋を取り、Royal Accessが自然に置ける時だけAtziriへ。Expeditionの合間に回すサブ寺院向きです。",
+        "advice.importFailed.title": "Import失敗",
+        "advice.importFailed.body": "{message}"
+      },
+      en: {
+        "app.title": "Temple Advisor",
+        "app.mode": "0.5 Boss / Reward",
+        "section.tier": "Tier",
+        "section.palette": "Palette",
+        "section.marks": "Marks",
+        "section.options": "Options",
+        "mark.protect": "Protect",
+        "mark.upgrade": "Upgrade",
+        "label.goal": "Goal",
+        "goal.hybrid": "Boss + Vault",
+        "goal.boss": "Atziri Rush",
+        "goal.value": "Reward Rooms",
+        "board.title": "Current Board",
+        "board.subtitle": "Click cells to paint rooms",
+        "action.evaluate": "Evaluate",
+        "action.preset": "Preset",
+        "action.clear": "Clear",
+        "action.export": "Export",
+        "action.import": "Import",
+        "external.atziri": "Atziri's Chamber",
+        "external.entrance": "Entrance",
+        "legend.add": "Add",
+        "legend.keep": "Keep",
+        "legend.protect": "Protect",
+        "legend.conflict": "Conflict",
+        "advice.title": "Route Advice",
+        "advice.subtitle": "From current board",
+        "json.title": "Board JSON",
+        "footer.note": "The icons are local schematic symbols for planning. They are not copied game assets.",
+        "room.empty": "Clear",
+        "room.path": "Path",
+        "room.architect": "Arch",
+        "room.access": "Access",
+        "room.currency": "Currency",
+        "room.lineage": "Lineage",
+        "room.tablets": "Tablets",
+        "room.unique": "Unique",
+        "room.treasure": "Treasure",
+        "room.alchemy": "Alchemy",
+        "room.sacrifice": "Sacrifice",
+        "room.thaum": "Thaum",
+        "room.spymaster": "Spy",
+        "room.generator": "Gen",
+        "room.garrison": "Garrison",
+        "room.smithy": "Smithy",
+        "room.corruption": "Corrupt",
+        "room.flesh": "Flesh",
+        "score.empty": "No board yet",
+        "score.emptyText": "Place the Architect and evaluate to see route, protection, and reward-room changes.",
+        "score.ready": "Ready to run",
+        "score.readyText": "The route and value rooms are tidy enough. Add protection and run it.",
+        "score.repairable": "Repairable",
+        "score.repairableText": "The spine is visible. Stabilize Royal Access or the protection targets next.",
+        "score.spine": "Build the spine",
+        "score.spineText": "First lock the Architect position and the central route.",
+        "advice.placeArchitect.title": "Place the Architect",
+        "advice.placeArchitect.body": "Place the current fixed Architect location so the route to Royal Access can be calculated accurately.",
+        "advice.placeArchitect.initial": "Place the Architect position from your current Temple first, then connect upward toward a Royal Access candidate.",
+        "advice.royal.title": "Royal Access candidate",
+        "advice.royal.body": "After the Architect, aim to place Royal Access around {coord}. If the room appears elsewhere, use the closest outer slot.",
+        "advice.conflict.title": "Value room on the spine",
+        "advice.conflict.body": "{cells} would hurt to overwrite. Move it to a side pocket, or treat that cell as protected route.",
+        "advice.protect.title": "Juatalotli candidates",
+        "advice.protect.body": "Prioritize {cells}. Protect route junctions or T3 value rooms.",
+        "advice.reward.title": "Architect reward rooms",
+        "advice.reward.body": "If Currency / Lineage / Tablets / Uniques Vault appears, place it in an outer side pocket next to the spine for 0.5.",
+        "advice.spine.title": "Fill the spine first",
+        "advice.spine.body": "There are {count} candidate Path cells. Connect Entrance -> Architect -> Royal Access before adding more value rooms.",
+        "advice.goal.boss.title": "Atziri leaning",
+        "advice.goal.boss.body": "After Royal Access, run Atziri and keep normal value rooms to 2-3. Fewer extras make the board easier to repair.",
+        "advice.goal.value.title": "Reward leaning",
+        "advice.goal.value.body": "Do not rush Atziri. Grow Architect reward rooms plus Alchemy/Sacrifice/Thaumaturge. Royal Access is optional.",
+        "advice.goal.hybrid.title": "Hybrid plan",
+        "advice.goal.hybrid.body": "Take Architect reward rooms and go Atziri only when Royal Access lands naturally. This fits side Temple runs between Expedition maps.",
+        "advice.importFailed.title": "Import failed",
+        "advice.importFailed.body": "{message}"
+      }
+    };
+
+    const roomTypes = [
+      ["empty", "room.empty", "i-empty"],
+      ["path", "room.path", "i-path"],
+      ["architect", "room.architect", "i-architect"],
+      ["access", "room.access", "i-access"],
+      ["currency", "room.currency", "i-currency"],
+      ["lineage", "room.lineage", "i-lineage"],
+      ["tablets", "room.tablets", "i-tablets"],
+      ["unique", "room.unique", "i-unique"],
+      ["treasure", "room.treasure", "i-treasure"],
+      ["alchemy", "room.alchemy", "i-alchemy"],
+      ["sacrifice", "room.sacrifice", "i-sacrifice"],
+      ["thaum", "room.thaum", "i-thaum"],
+      ["spymaster", "room.spymaster", "i-spymaster"],
+      ["generator", "room.generator", "i-generator"],
+      ["garrison", "room.garrison", "i-garrison"],
+      ["smithy", "room.smithy", "i-smithy"],
+      ["corruption", "room.corruption", "i-corruption"],
+      ["flesh", "room.flesh", "i-flesh"]
+    ];
+
+    const roomMeta = Object.fromEntries(roomTypes.map(([id, labelKey, icon]) => [id, { id, labelKey, icon }]));
+    const valueRooms = new Set(["currency", "lineage", "tablets", "unique", "treasure", "alchemy", "sacrifice", "thaum", "spymaster", "generator", "smithy", "corruption", "flesh", "garrison"]);
+    const rewardRooms = new Set(["currency", "lineage", "tablets", "unique"]);
+    const premiumRooms = new Set(["currency", "lineage", "tablets", "unique", "treasure", "alchemy", "sacrifice", "thaum"]);
+    const rows = 9;
+    const cols = 9;
+    const storageKey = "poe-temple-advisor:v1:local-state";
+    const legacyLangKey = "templeAdvisorLang";
+    let selectedRoom = "path";
+    let selectedTier = 3;
+    let markMode = null;
+    let board = makeEmptyBoard();
+    let suggestions = new Map();
+    let currentLang = readStoredLang();
+    let lastScore = 0;
+    let lastAdvice = [makeAdvice("advice.placeArchitect.title", "advice.placeArchitect.initial")];
+
+    const boardEl = document.getElementById("board");
+    const paletteEl = document.getElementById("palette");
+    const adviceList = document.getElementById("adviceList");
+
+    function t(key, vars = {}) {
+      const dict = translations[currentLang] || translations.ja;
+      const template = dict[key] ?? translations.en[key] ?? key;
+      return template.replace(/\{(\w+)\}/g, (_, name) => vars[name] ?? "");
+    }
+
+    function makeAdvice(titleKey, bodyKey, vars = {}) {
+      return { titleKey, bodyKey, vars };
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function applyLanguage() {
+      document.documentElement.lang = currentLang;
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        el.textContent = t(el.dataset.i18n);
+      });
+      document.getElementById("langToggle").textContent = currentLang === "ja" ? "English" : "日本語";
+      renderAll();
+      renderAdvice(lastScore, lastAdvice);
+    }
+
+    function readLocalState() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKey) || "null");
+      } catch {
+        return null;
+      }
+    }
+
+    function readStoredLang() {
+      const state = readLocalState();
+      if (state?.language && translations[state.language]) return state.language;
+      try {
+        const legacyLang = localStorage.getItem(legacyLangKey);
+        if (legacyLang && translations[legacyLang]) return legacyLang;
+      } catch {}
+      return "ja";
+    }
+
+    function isBoardState(candidate) {
+      return Array.isArray(candidate)
+        && candidate.length === rows
+        && candidate.every(row => Array.isArray(row) && row.length === cols);
+    }
+
+    function normalizeBoardState(candidate) {
+      return candidate.map(row => row.map(cell => {
+        const type = cell && roomMeta[cell.type] ? cell.type : "empty";
+        const tier = Math.max(1, Math.min(3, Number(cell?.tier) || 1));
+        return {
+          type,
+          tier,
+          protect: Boolean(cell?.protect),
+          upgrade: Boolean(cell?.upgrade)
+        };
+      }));
+    }
+
+    function loadLocalState() {
+      const state = readLocalState();
+      if (!state) return false;
+      if (state.language && translations[state.language]) currentLang = state.language;
+      if (isBoardState(state.board)) board = normalizeBoardState(state.board);
+      if (state.protectCount !== undefined) {
+        const protectCount = Math.max(0, Math.min(6, Number(state.protectCount) || 0));
+        document.getElementById("protectCount").value = protectCount;
+      }
+      if (["hybrid", "boss", "value"].includes(state.valueGoal)) {
+        document.getElementById("valueGoal").value = state.valueGoal;
+      }
+      return true;
+    }
+
+    function saveLocalState() {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify({
+          version: 1,
+          savedAt: new Date().toISOString(),
+          language: currentLang,
+          protectCount: Number(document.getElementById("protectCount").value || 0),
+          valueGoal: document.getElementById("valueGoal").value,
+          board
+        }));
+        localStorage.setItem(legacyLangKey, currentLang);
+      } catch {}
+    }
+
+    function makeEmptyBoard() {
+      return Array.from({ length: rows }, () => Array.from({ length: cols }, () => ({ type: "empty", tier: 1, protect: false, upgrade: false })));
+    }
+
+    function icon(type) {
+      const meta = roomMeta[type] || roomMeta.empty;
+      return `<span class="tile-icon room-${meta.id}"><svg><use href="#${meta.icon}"></use></svg></span>`;
+    }
+
+    function key(r, c) { return `${r},${c}`; }
+    function parseKey(k) { return k.split(",").map(Number); }
+    function inBounds(r, c) { return r >= 0 && r < rows && c >= 0 && c < cols; }
+
+    function renderPalette() {
+      paletteEl.innerHTML = roomTypes.map(([id, labelKey]) => {
+        const label = t(labelKey);
+        return `
+        <button class="palette-button ${selectedRoom === id ? "active" : ""}" data-room="${id}" title="${escapeHtml(label)}">
+          ${icon(id)}
+          <span class="mini-label">${escapeHtml(label)}</span>
+        </button>
+      `;
+      }).join("");
+      paletteEl.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          selectedRoom = btn.dataset.room;
+          markMode = null;
+          renderAll();
+        });
+      });
+    }
+
+    function renderBoard() {
+      boardEl.innerHTML = "";
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cell = board[r][c];
+          const sug = suggestions.get(key(r, c));
+          const classes = ["cell"];
+          if (cell.type !== "empty") classes.push("has-room", `room-${cell.type}`);
+          if (sug?.kind) classes.push(`suggest-${sug.kind}`);
+          if (sug?.protect) classes.push("suggest-protect");
+          const button = document.createElement("button");
+          button.className = classes.join(" ");
+          const roomLabel = cell.type === "empty" ? "" : ` - ${t(roomMeta[cell.type]?.labelKey || "room.empty")}`;
+          button.title = `${String.fromCharCode(65 + c)}${r + 1}${roomLabel}`;
+          button.dataset.r = r;
+          button.dataset.c = c;
+          button.innerHTML = `
+            ${cell.type === "empty" ? "" : icon(cell.type)}
+            ${cell.type !== "empty" && cell.tier > 1 ? `<span class="tier">T${cell.tier}</span>` : ""}
+            ${cell.protect ? `<span class="mark"><svg class="tile-icon"><use href="#i-lock"></use></svg></span>` : ""}
+            ${cell.upgrade ? `<span class="mark"><svg class="tile-icon"><use href="#i-arrow"></use></svg></span>` : ""}
+            ${cell.type === "empty" ? `<span class="coord">${String.fromCharCode(65 + c)}${r + 1}</span>` : ""}
+          `;
+          button.addEventListener("click", () => paintCell(r, c));
+          button.addEventListener("contextmenu", (event) => {
+            event.preventDefault();
+            board[r][c] = { type: "empty", tier: 1, protect: false, upgrade: false };
+            suggestions.clear();
+            renderBoard();
+            exportBoard();
+            saveLocalState();
+          });
+          boardEl.appendChild(button);
+        }
+      }
+    }
+
+    function paintCell(r, c) {
+      if (markMode === "protect") {
+        if (board[r][c].type !== "empty") board[r][c].protect = !board[r][c].protect;
+      } else if (markMode === "upgrade") {
+        if (board[r][c].type !== "empty") board[r][c].upgrade = !board[r][c].upgrade;
+      } else if (selectedRoom === "empty") {
+        board[r][c] = { type: "empty", tier: 1, protect: false, upgrade: false };
+      } else {
+        board[r][c] = { type: selectedRoom, tier: selectedTier, protect: false, upgrade: false };
+      }
+      suggestions.clear();
+      renderBoard();
+      exportBoard();
+      saveLocalState();
+    }
+
+    function renderAll() {
+      renderPalette();
+      renderBoard();
+      document.getElementById("protectMode").classList.toggle("active", markMode === "protect");
+      document.getElementById("upgradeMode").classList.toggle("active", markMode === "upgrade");
+    }
+
+    function findCells(type) {
+      const found = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) if (board[r][c].type === type) found.push([r, c]);
+      }
+      return found;
+    }
+
+    function manhattanRoute(a, b) {
+      const out = [];
+      let [r, c] = a;
+      const [tr, tc] = b;
+      while (r !== tr) {
+        out.push([r, c]);
+        r += tr > r ? 1 : -1;
+      }
+      while (c !== tc) {
+        out.push([r, c]);
+        c += tc > c ? 1 : -1;
+      }
+      out.push([tr, tc]);
+      return out;
+    }
+
+    function nearestTopAccess() {
+      const existing = findCells("access");
+      if (existing.length) return existing[0];
+      const preferred = [[0,4], [0,3], [0,5], [1,4], [1,3], [1,5], [0,2], [0,6]];
+      for (const p of preferred) {
+        const cell = board[p[0]][p[1]];
+        if (cell.type === "empty" || cell.type === "path") return p;
+      }
+      return [0,4];
+    }
+
+    function routeCells() {
+      const arch = findCells("architect")[0] || [5, 4];
+      const access = nearestTopAccess();
+      const first = manhattanRoute([8, 4], arch);
+      const second = manhattanRoute(arch, access);
+      const all = [...first, ...second].filter(([r, c], i, arr) => arr.findIndex(([rr, cc]) => rr === r && cc === c) === i);
+      return { arch, access, route: all };
+    }
+
+    function sidePockets(route) {
+      const routeSet = new Set(route.map(([r, c]) => key(r, c)));
+      const pockets = [];
+      for (const [r, c] of route) {
+        for (const [dr, dc] of [[0, -1], [0, 1]]) {
+          const nr = r + dr, nc = c + dc;
+          if (!inBounds(nr, nc) || routeSet.has(key(nr, nc))) continue;
+          pockets.push([nr, nc, Math.abs(nr - 4) + Math.abs(nc - 4)]);
+        }
+      }
+      pockets.sort((a, b) => a[2] - b[2]);
+      return pockets.map(([r, c]) => [r, c]);
+    }
+
+    function evaluateBoard() {
+      const { arch, access, route } = routeCells();
+      const routeSet = new Set(route.map(([r, c]) => key(r, c)));
+      const advice = [];
+      suggestions = new Map();
+      let score = 0;
+      let max = 100;
+
+      const archMarked = findCells("architect").length > 0;
+      const accessMarked = findCells("access").length > 0;
+
+      if (!archMarked) {
+        advice.push(makeAdvice("advice.placeArchitect.title", "advice.placeArchitect.body"));
+      } else {
+        score += 12;
+      }
+
+      for (const [r, c] of route) {
+        const cell = board[r][c];
+        if (cell.type === "path" || cell.type === "architect" || cell.type === "access") {
+          suggestions.set(key(r, c), { kind: "keep" });
+          score += 2.2;
+        } else if (cell.type === "empty") {
+          suggestions.set(key(r, c), { kind: "add" });
+        } else if (valueRooms.has(cell.type)) {
+          suggestions.set(key(r, c), { kind: "warn" });
+        }
+      }
+
+      if (!accessMarked) {
+        suggestions.set(key(access[0], access[1]), { kind: "add" });
+        advice.push(makeAdvice("advice.royal.title", "advice.royal.body", { coord: coord(access) }));
+      } else {
+        score += 10;
+      }
+
+      const pockets = sidePockets(route);
+      const placedPremium = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cell = board[r][c];
+          if (premiumRooms.has(cell.type)) placedPremium.push([r, c, cell]);
+        }
+      }
+      score += Math.min(18, placedPremium.length * 4);
+
+      const availablePockets = pockets.filter(([r, c]) => {
+        const cell = board[r][c];
+        return cell.type === "empty" || premiumRooms.has(cell.type);
+      }).slice(0, 6);
+      for (const [r, c] of availablePockets) {
+        const cell = board[r][c];
+        if (cell.type === "empty") suggestions.set(key(r, c), { kind: "add" });
+        if (premiumRooms.has(cell.type)) suggestions.set(key(r, c), { kind: "keep" });
+      }
+
+      const conflicts = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cell = board[r][c];
+          if (valueRooms.has(cell.type) && routeSet.has(key(r, c)) && cell.type !== "architect" && cell.type !== "access") {
+            conflicts.push([r, c, cell.type]);
+          }
+        }
+      }
+      if (conflicts.length) {
+        advice.push(makeAdvice("advice.conflict.title", "advice.conflict.body", { cells: conflicts.map(([r,c]) => coord([r,c])).join(", ") }));
+      } else {
+        score += 10;
+      }
+
+      const protectCount = Number(document.getElementById("protectCount").value || 0);
+      const protectTargets = chooseProtectTargets(route, placedPremium, protectCount);
+      for (const [r, c] of protectTargets) {
+        const existing = suggestions.get(key(r, c)) || {};
+        suggestions.set(key(r, c), { ...existing, protect: true });
+      }
+      if (protectTargets.length) {
+        advice.push(makeAdvice("advice.protect.title", "advice.protect.body", { cells: protectTargets.map(coord).join(", ") }));
+        score += Math.min(16, protectTargets.length * 8);
+      }
+
+      const rewardCount = placedPremium.filter(([, , cell]) => rewardRooms.has(cell.type)).length;
+      if (rewardCount) score += Math.min(12, rewardCount * 6);
+      if (!rewardCount) {
+        advice.push(makeAdvice("advice.reward.title", "advice.reward.body"));
+      }
+
+      const routeGaps = route.filter(([r, c]) => board[r][c].type === "empty").length;
+      if (routeGaps) {
+        advice.push(makeAdvice("advice.spine.title", "advice.spine.body", { count: routeGaps }));
+      } else {
+        score += 12;
+      }
+
+      const goal = document.getElementById("valueGoal").value;
+      if (goal === "boss") {
+        advice.push(makeAdvice("advice.goal.boss.title", "advice.goal.boss.body"));
+      } else if (goal === "value") {
+        advice.push(makeAdvice("advice.goal.value.title", "advice.goal.value.body"));
+      } else {
+        advice.push(makeAdvice("advice.goal.hybrid.title", "advice.goal.hybrid.body"));
+      }
+
+      score = Math.max(0, Math.min(100, Math.round(score)));
+      renderAdvice(score, advice);
+      renderBoard();
+      exportBoard();
+      saveLocalState();
+    }
+
+    function chooseProtectTargets(route, premium, count) {
+      if (count <= 0) return [];
+      const routeSet = new Set(route.map(([r, c]) => key(r, c)));
+      const candidates = [];
+      for (const [r, c, cell] of premium) {
+        if (cell.tier >= 3) candidates.push([r, c, 100 + (rewardRooms.has(cell.type) ? 20 : 0)]);
+      }
+      const access = nearestTopAccess();
+      const beforeAccess = route[Math.max(0, route.findIndex(([r, c]) => r === access[0] && c === access[1]) - 1)];
+      if (beforeAccess) candidates.push([beforeAccess[0], beforeAccess[1], 85]);
+      for (const [r, c] of route) {
+        const sideCount = [[0, -1], [0, 1], [-1, 0], [1, 0]].filter(([dr, dc]) => {
+          const nr = r + dr, nc = c + dc;
+          return inBounds(nr, nc) && !routeSet.has(key(nr, nc)) && board[nr][nc].type !== "empty";
+        }).length;
+        if (sideCount >= 2) candidates.push([r, c, 70 + sideCount]);
+      }
+      const unique = new Map();
+      for (const [r, c, score] of candidates) {
+        const k = key(r, c);
+        if (!unique.has(k) || unique.get(k)[2] < score) unique.set(k, [r, c, score]);
+      }
+      return [...unique.values()].sort((a, b) => b[2] - a[2]).slice(0, count).map(([r, c]) => [r, c]);
+    }
+
+    function coord([r, c]) {
+      return `${String.fromCharCode(65 + c)}${r + 1}`;
+    }
+
+    function renderAdvice(score, advice) {
+      lastScore = score;
+      lastAdvice = advice;
+      const ring = document.getElementById("scoreRing");
+      ring.style.setProperty("--score", `${Math.round(score * 3.6)}deg`);
+      ring.textContent = score;
+      const titleKey = score === 0 ? "score.empty" : score >= 76 ? "score.ready" : score >= 52 ? "score.repairable" : "score.spine";
+      const textKey = score === 0 ? "score.emptyText" : score >= 76 ? "score.readyText" : score >= 52 ? "score.repairableText" : "score.spineText";
+      document.getElementById("scoreTitle").textContent = t(titleKey);
+      document.getElementById("scoreText").textContent = t(textKey);
+      adviceList.innerHTML = advice.slice(0, 7).map((item, index) => {
+        const title = Array.isArray(item) ? item[0] : t(item.titleKey, item.vars);
+        const body = Array.isArray(item) ? item[1] : t(item.bodyKey, item.vars);
+        return `
+        <div class="advice">
+          <div class="badge">${index + 1}</div>
+          <div><strong>${escapeHtml(title)}</strong><p>${escapeHtml(body)}</p></div>
+        </div>
+      `;
+      }).join("");
+    }
+
+    function loadPreset() {
+      board = makeEmptyBoard();
+      const set = (r, c, type, tier = 3, protect = false) => board[r][c] = { type, tier, protect, upgrade: false };
+      [[8,4], [7,4], [6,4], [5,4], [4,4], [3,4], [2,4], [1,4]].forEach(([r, c]) => set(r, c, "path", 1));
+      set(6, 4, "architect", 1);
+      set(0, 4, "access", 1);
+      set(2, 3, "currency", 3, true);
+      set(2, 5, "lineage", 3);
+      set(4, 3, "thaum", 3);
+      set(4, 5, "treasure", 3);
+      set(5, 3, "alchemy", 3);
+      set(5, 5, "sacrifice", 3);
+      set(3, 4, "path", 1, true);
+      evaluateBoard();
+    }
+
+    function clearBoard() {
+      board = makeEmptyBoard();
+      suggestions.clear();
+      renderAdvice(0, [makeAdvice("advice.placeArchitect.title", "advice.placeArchitect.initial")]);
+      renderAll();
+      exportBoard();
+      saveLocalState();
+    }
+
+    function exportBoard() {
+      document.getElementById("boardJson").value = JSON.stringify({ version: 1, board }, null, 2);
+    }
+
+    function importBoard() {
+      try {
+        const parsed = JSON.parse(document.getElementById("boardJson").value);
+        if (!Array.isArray(parsed.board) || parsed.board.length !== rows) throw new Error("Invalid board");
+        if (!isBoardState(parsed.board)) throw new Error("Invalid board");
+        board = normalizeBoardState(parsed.board);
+        suggestions.clear();
+        renderAll();
+        exportBoard();
+        saveLocalState();
+      } catch (error) {
+        renderAdvice(0, [makeAdvice("advice.importFailed.title", "advice.importFailed.body", { message: error.message })]);
+      }
+    }
+
+    document.getElementById("langToggle").addEventListener("click", () => {
+      currentLang = currentLang === "ja" ? "en" : "ja";
+      applyLanguage();
+      saveLocalState();
+    });
+
+    document.getElementById("tierButtons").querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        selectedTier = Number(btn.dataset.tier);
+        document.getElementById("tierButtons").querySelectorAll("button").forEach(b => b.classList.toggle("active", b === btn));
+      });
+    });
+
+    document.getElementById("protectMode").addEventListener("click", () => {
+      markMode = markMode === "protect" ? null : "protect";
+      renderAll();
+    });
+    document.getElementById("upgradeMode").addEventListener("click", () => {
+      markMode = markMode === "upgrade" ? null : "upgrade";
+      renderAll();
+    });
+    document.getElementById("evaluate").addEventListener("click", evaluateBoard);
+    document.getElementById("loadPreset").addEventListener("click", loadPreset);
+    document.getElementById("clearBoard").addEventListener("click", clearBoard);
+    document.getElementById("exportJson").addEventListener("click", exportBoard);
+    document.getElementById("importJson").addEventListener("click", importBoard);
+    document.getElementById("protectCount").addEventListener("change", evaluateBoard);
+    document.getElementById("valueGoal").addEventListener("change", evaluateBoard);
+
+    loadLocalState();
+    applyLanguage();
+    exportBoard();
+  </script>
+</body>
+</html>
