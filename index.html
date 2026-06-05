@@ -873,6 +873,7 @@
       <div class="tool-section">
         <h2 data-i18n="section.marks">Marks</h2>
         <div class="action-row">
+          <button class="small-button" id="eraseMode"><span class="tile-icon"><svg><use href="#i-empty"></use></svg></span><span data-i18n="mark.erase">Erase</span></button>
           <button class="small-button" id="protectMode"><span class="tile-icon"><svg><use href="#i-lock"></use></svg></span><span data-i18n="mark.protect">Protect</span></button>
           <button class="small-button" id="upgradeMode"><span class="tile-icon"><svg><use href="#i-arrow"></use></svg></span><span data-i18n="mark.upgrade">Upgrade</span></button>
         </div>
@@ -976,6 +977,7 @@
         "section.palette": "Palette",
         "section.marks": "Marks",
         "section.options": "Options",
+        "mark.erase": "消去",
         "mark.protect": "保護",
         "mark.upgrade": "育成",
         "label.goal": "方針",
@@ -1088,6 +1090,7 @@
         "section.palette": "Palette",
         "section.marks": "Marks",
         "section.options": "Options",
+        "mark.erase": "Erase",
         "mark.protect": "Protect",
         "mark.upgrade": "Upgrade",
         "label.goal": "Goal",
@@ -1688,6 +1691,16 @@
             ${cell.type === "empty" ? `<span class="coord">${String.fromCharCode(65 + c)}${r + 1}</span>` : ""}
           `;
           button.addEventListener("click", () => paintCell(r, c));
+          button.addEventListener("contextmenu", event => {
+            event.preventDefault();
+            clearCell(r, c);
+          });
+          button.addEventListener("keydown", event => {
+            if (event.key === "Delete" || event.key === "Backspace") {
+              event.preventDefault();
+              clearCell(r, c);
+            }
+          });
           boardEl.appendChild(button);
         }
       }
@@ -1711,11 +1724,20 @@
       saveLocalState();
     }
 
+    function clearCell(r, c) {
+      board[r][c] = { type: "empty", protect: false, upgrade: false };
+      suggestions.clear();
+      renderBoard();
+      exportBoard();
+      saveLocalState();
+    }
+
     function renderAll() {
       renderOfferedCards();
       renderPaletteTabs();
       renderPalette();
       renderBoard();
+      document.getElementById("eraseMode").classList.toggle("active", !markMode && selectedRoom === "empty");
       document.getElementById("protectMode").classList.toggle("active", markMode === "protect");
       document.getElementById("upgradeMode").classList.toggle("active", markMode === "upgrade");
     }
@@ -2163,6 +2185,12 @@
       saveLocalState();
     });
 
+    document.getElementById("eraseMode").addEventListener("click", () => {
+      selectedRoom = "empty";
+      markMode = null;
+      renderAll();
+      saveLocalState();
+    });
     document.getElementById("protectMode").addEventListener("click", () => {
       markMode = markMode === "protect" ? null : "protect";
       renderAll();
